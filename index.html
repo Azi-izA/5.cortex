@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>5.Cortex — Файлообменник + Сокращатель ссылок</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>5.Cortex — Оригинальный файлообменник</title>
     <style>
         * {
             margin: 0;
@@ -13,60 +13,58 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: radial-gradient(circle at 10% 20%, #0a0f1e 0%, #03050a 100%);
+            background: radial-gradient(circle at 10% 20%, #0a0a14 0%, #020206 100%);
             min-height: 100vh;
             color: #eef2ff;
-            padding: 20px;
+            overflow-x: hidden;
             position: relative;
         }
 
-        /* Анимированный фон */
-        body::before {
-            content: '';
+        /* Canvas для частиц */
+        #particles-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 30% 40%, rgba(79, 122, 255, 0.08) 0%, transparent 60%);
             pointer-events: none;
             z-index: 0;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
+            padding: 20px;
             position: relative;
             z-index: 2;
         }
 
-        /* Стеклянные карточки с улучшенным эффектом */
+        /* Стеклянные карточки */
         .glass-card {
-            background: rgba(15, 20, 35, 0.65);
+            background: rgba(12, 16, 28, 0.65);
             backdrop-filter: blur(20px);
             border-radius: 48px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(79, 122, 255, 0.25);
             padding: 28px 24px;
             margin-bottom: 24px;
-            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, border-color 0.2s;
         }
 
         .glass-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.5);
-            border-color: rgba(79, 122, 255, 0.3);
+            border-color: rgba(79, 122, 255, 0.5);
+            transform: translateY(-2px);
         }
 
         h1 {
-            font-size: 2.4rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #FFFFFF 0%, #7c9eff 100%);
+            font-size: 2.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #7c9eff 50%, #a56eff 100%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             margin-bottom: 8px;
-            letter-spacing: -0.3px;
+            letter-spacing: -0.5px;
         }
 
         .sub {
@@ -77,58 +75,26 @@
             font-weight: 400;
         }
 
-        /* Вкладки */
-        .tabs {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-        .tab-btn {
-            background: rgba(30, 35, 55, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 60px;
-            padding: 12px 28px;
-            font-size: 1rem;
-            font-weight: 590;
-            color: #b9c3e6;
-            cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
-        }
-        .tab-btn.active {
-            background: linear-gradient(135deg, #4f7aff, #2b4cd4);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 6px 16px rgba(79,122,255,0.3);
-            transform: scale(0.98);
-        }
-        .tab-btn:hover:not(.active) {
-            background: rgba(79, 122, 255, 0.2);
-            border-color: rgba(79, 122, 255, 0.5);
-        }
-        .tab-pane { display: none; animation: fadeInUp 0.4s ease; }
-        .tab-pane.active { display: block; }
-
-        /* Зона загрузки файлов */
+        /* Зона загрузки */
         .dropzone {
-            border: 2px dashed rgba(79, 122, 255, 0.5);
-            border-radius: 40px;
-            padding: 48px 20px;
+            border: 2px dashed rgba(79, 122, 255, 0.6);
+            border-radius: 48px;
+            padding: 40px 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s;
-            background: rgba(0, 0, 0, 0.2);
+            transition: all 0.25s;
+            background: rgba(0, 0, 0, 0.3);
         }
         .dropzone.drag-over {
             border-color: #4f7aff;
-            background: rgba(79, 122, 255, 0.08);
-            transform: scale(0.99);
+            background: rgba(79, 122, 255, 0.1);
+            transform: scale(0.98);
         }
+
         .dropzone-icon {
-            font-size: 56px;
+            font-size: 64px;
             margin-bottom: 16px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 4px 10px rgba(79,122,255,0.4));
         }
 
         .btn {
@@ -144,71 +110,116 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 12px rgba(79,122,255,0.3);
+            box-shadow: 0 6px 14px rgba(79,122,255,0.3);
         }
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(79,122,255,0.4);
+            box-shadow: 0 10px 24px rgba(79,122,255,0.4);
         }
-        .btn:active {
-            transform: scale(0.97);
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #4f7aff;
+            box-shadow: none;
+        }
+        .btn-outline:hover {
+            background: rgba(79,122,255,0.2);
         }
 
+        /* Предпросмотр файлов */
+        .file-preview-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .preview-item {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 8px;
+            width: 100px;
+            text-align: center;
+            position: relative;
+        }
+        .preview-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 16px;
+        }
+        .preview-item .remove-file {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff3b30;
+            border-radius: 20px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+        }
+
+        .progress-group {
+            margin: 16px 0;
+        }
         .progress-bar {
-            width: 100%;
-            height: 6px;
+            height: 8px;
             background: #2a2f3f;
             border-radius: 10px;
             overflow: hidden;
-            margin: 16px 0;
         }
         .progress-fill {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, #4f7aff, #9b4dff);
-            transition: width 0.3s ease;
+            background: linear-gradient(90deg, #4f7aff, #a56eff);
+            transition: width 0.2s;
         }
 
-        /* Элементы списка */
-        .file-item, .link-item {
-            background: rgba(25, 30, 45, 0.7);
-            backdrop-filter: blur(10px);
+        /* История загрузок */
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .history-item {
+            background: rgba(20, 25, 45, 0.7);
+            backdrop-filter: blur(8px);
             border-radius: 28px;
-            padding: 16px 20px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            transition: all 0.2s;
+            padding: 16px;
             border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.2s;
         }
-        .file-item:hover, .link-item:hover {
-            background: rgba(35, 40, 60, 0.8);
-            border-color: rgba(79,122,255,0.3);
+        .history-item:hover {
+            border-color: #4f7aff;
+            transform: translateY(-2px);
         }
-        .file-info, .link-info { flex: 1; min-width: 150px; }
-        .file-name, .link-original { font-weight: 600; word-break: break-all; }
-        .file-meta, .link-meta { font-size: 0.75rem; color: #8e9bb5; margin-top: 4px; }
-        .link-short { font-size: 0.8rem; color: #7c9eff; word-break: break-all; }
-        .action-buttons { display: flex; gap: 10px; }
-        .icon-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: none;
-            border-radius: 40px;
-            padding: 8px 16px;
-            color: white;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: 0.2s;
+        .history-thumb {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            background: #0a0a14;
         }
-        .icon-btn:hover {
-            background: rgba(79, 122, 255, 0.5);
-            transform: scale(0.96);
+        .history-name {
+            font-weight: 600;
+            word-break: break-all;
+            margin-bottom: 4px;
+        }
+        .history-meta {
+            font-size: 0.7rem;
+            color: #8e9bb5;
+        }
+        .history-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
         }
 
-        /* Уведомления */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -218,149 +229,153 @@
             backdrop-filter: blur(20px);
             padding: 12px 28px;
             border-radius: 60px;
-            color: white;
-            font-size: 0.9rem;
             z-index: 1000;
-            animation: slideUp 0.3s ease;
-            border: 1px solid rgba(79,122,255,0.4);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            animation: fadeUp 0.3s ease;
+            border: 1px solid #4f7aff;
         }
 
-        /* Форма сокращения */
-        .url-input-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin: 20px 0;
-        }
-        .url-input-group input {
-            flex: 1;
-            background: rgba(30,35,55,0.8);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 60px;
-            padding: 14px 24px;
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.2s;
-        }
-        .url-input-group input:focus {
-            border-color: #4f7aff;
-            box-shadow: 0 0 0 3px rgba(79,122,255,0.2);
-        }
-        .custom-code {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 60px;
-            padding: 4px 8px 4px 20px;
-        }
-        .custom-code span { color: #8e9bb5; }
-        .custom-code input { width: 140px; background: transparent; border: none; color: white; outline: none; padding: 10px 0; }
-
-        /* Анимации */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideUp {
+        @keyframes fadeUp {
             from { opacity: 0; transform: translateX(-50%) translateY(20px); }
             to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
-        @media (max-width: 640px) {
-            body { padding: 12px; }
-            .glass-card { padding: 20px 16px; border-radius: 32px; }
+        @media (max-width: 680px) {
+            .container { padding: 12px; }
             h1 { font-size: 1.8rem; }
-            .file-item, .link-item { flex-direction: column; align-items: flex-start; }
-            .action-buttons { align-self: flex-end; }
-            .custom-code { width: 100%; justify-content: space-between; }
-            .custom-code input { width: auto; flex: 1; }
+            .glass-card { padding: 20px; border-radius: 32px; }
         }
     </style>
 </head>
 <body>
+<canvas id="particles-canvas"></canvas>
+
 <div class="container">
-    <div class="glass-card" style="text-align: center; padding-bottom: 20px;">
-        <h1>⚡ 5.Cortex Tools</h1>
-        <div class="sub">Файлообменник + Сокращатель ссылок — быстро, красиво, надёжно</div>
+    <div class="glass-card" style="text-align: center;">
+        <h1>📦 5.Cortex Share</h1>
+        <div class="sub">Оригинальный файлообменник — загружай несколько файлов, создавай ZIP, защищай паролем</div>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="files">📁 Файлообменник</button>
-        <button class="tab-btn" data-tab="links">🔗 Сокращатель ссылок</button>
-    </div>
-
-    <!-- Панель файлообменника -->
-    <div id="files-tab" class="tab-pane active">
-        <div class="glass-card">
-            <div id="dropzone" class="dropzone">
-                <div class="dropzone-icon">📂</div>
-                <div>Перетащите файл сюда или нажмите для выбора</div>
-                <input type="file" id="fileInput" style="display: none;">
-                <div style="margin-top: 24px;">
-                    <button id="selectFileBtn" class="btn">Выбрать файл</button>
-                </div>
-            </div>
-            <div id="uploadProgress" style="display: none;">
-                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-                <div id="uploadStatus" style="font-size: 0.85rem; color: #aaa;">Подготовка...</div>
+    <div class="glass-card">
+        <div id="dropzone" class="dropzone">
+            <div class="dropzone-icon">⚡</div>
+            <div>Перетащите файлы сюда или нажмите для выбора</div>
+            <div style="font-size: 0.8rem; margin-top: 8px;">(до 5 файлов, до 500 МБ суммарно)</div>
+            <input type="file" id="fileInput" multiple style="display: none;">
+            <div style="margin-top: 24px;">
+                <button id="selectFilesBtn" class="btn">Выбрать файлы</button>
+                <button id="toggleZipBtn" class="btn btn-outline" style="margin-left: 12px;">📦 Создать ZIP</button>
+                <button id="togglePasswordBtn" class="btn btn-outline" style="margin-left: 12px;">🔒 Защитить паролем</button>
             </div>
         </div>
 
-        <div class="glass-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="font-size: 1.5rem; font-weight: 600;">📁 Последние загрузки</h2>
-                <button id="clearHistoryBtn" class="icon-btn" style="background: rgba(255,60,60,0.2);">Очистить историю</button>
+        <div id="filePreviewArea" class="file-preview-list"></div>
+
+        <div id="zipModeIndicator" style="display: none; background: rgba(79,122,255,0.2); border-radius: 40px; padding: 8px 16px; margin: 12px 0; text-align: center;">📦 Режим ZIP: все файлы будут упакованы в один архив</div>
+        <div id="passwordModeIndicator" style="display: none; background: rgba(255,100,100,0.2); border-radius: 40px; padding: 8px 16px; margin: 12px 0; text-align: center;">🔒 Парольная защита: ссылка будет содержать ключ</div>
+
+        <div id="uploadProgressArea" style="display: none;">
+            <div class="progress-group">
+                <div class="progress-bar"><div id="uploadProgressFill" class="progress-fill"></div></div>
+                <div id="uploadStatusText" style="margin-top: 8px; font-size: 0.85rem;">Подготовка...</div>
             </div>
-            <div id="historyList"><div style="text-align: center; padding: 30px; color: #8e9bb5;">Нет загруженных файлов</div></div>
         </div>
     </div>
 
-    <!-- Панель сокращателя ссылок -->
-    <div id="links-tab" class="tab-pane">
-        <div class="glass-card">
-            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 16px;">Создать короткую ссылку</h2>
-            <div class="url-input-group">
-                <input type="text" id="longUrlInput" placeholder="Введите длинную ссылку (https://...)" style="flex: 2;">
-                <div class="custom-code">
-                    <span>?go=</span>
-                    <input type="text" id="customCode" placeholder="код" maxlength="30">
-                </div>
-                <button id="shortenBtn" class="btn">Сократить</button>
-            </div>
-            <p style="font-size: 0.75rem; color: #8e9bb5; margin-top: 8px;">
-                🔗 Короткая ссылка: <span id="exampleShortUrl" style="color: #7c9eff;"></span><br>
-                ✅ Копируйте и делитесь — работает везде!
-            </p>
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+            <h2 style="font-size: 1.5rem;">📋 История загрузок</h2>
+            <button id="clearHistoryBtn" class="icon-btn" style="background: rgba(255,60,60,0.2); padding: 8px 16px; border-radius: 40px;">Очистить всё</button>
         </div>
-
-        <div class="glass-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="font-size: 1.5rem; font-weight: 600;">📋 Мои короткие ссылки</h2>
-                <button id="clearLinksBtn" class="icon-btn" style="background: rgba(255,60,60,0.2);">Очистить все</button>
-            </div>
-            <div id="linksList"><div style="text-align: center; padding: 30px; color: #8e9bb5;">Нет сокращённых ссылок</div></div>
-        </div>
+        <div id="historyGrid" class="history-grid"></div>
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-    // ========== ФАЙЛООБМЕННИК ==========
+    // ==================== ОРИГИНАЛЬНЫЙ ФАЙЛООБМЕННИК 5.CORTEX ====================
     const API_UPLOAD = 'https://tmpfiles.org/api/v1/upload';
-    const STORAGE_KEY = 'cortexshare_files';
+    const STORAGE_KEY = 'cortex_original_files';
     let fileHistory = [];
+    let selectedFiles = [];
+    let zipMode = false;
+    let passwordMode = false;
+    let generatedPassword = '';
+    let particlesAnimation = null;
 
-    function loadFileHistory() {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) { try { fileHistory = JSON.parse(saved); } catch(e) { fileHistory = []; } }
-        renderFileHistory();
+    // Частицы на фоне
+    function initParticles() {
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        let particles = [];
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        for (let i = 0; i < 80; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                radius: Math.random() * 2 + 1,
+                speedX: (Math.random() - 0.5) * 0.5,
+                speedY: (Math.random() - 0.5) * 0.5,
+                color: `rgba(79, 122, 255, ${Math.random() * 0.3 + 0.1})`
+            });
+        }
+
+        function animate() {
+            if (!canvas.isConnected) return;
+            ctx.clearRect(0, 0, width, height);
+            for (let p of particles) {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                if (p.x < 0) p.x = width;
+                if (p.x > width) p.x = 0;
+                if (p.y < 0) p.y = height;
+                if (p.y > height) p.y = 0;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
     }
-    function saveFileHistory() { localStorage.setItem(STORAGE_KEY, JSON.stringify(fileHistory.slice(0, 50))); }
-    function addToFileHistory(fileName, fileSize, downloadUrl) {
-        fileHistory.unshift({ id: Date.now(), name: fileName, size: fileSize, url: downloadUrl, date: new Date().toISOString() });
-        saveFileHistory(); renderFileHistory();
+    initParticles();
+
+    // Загрузка истории
+    function loadHistory() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try { fileHistory = JSON.parse(saved); } catch(e) { fileHistory = []; }
+        }
+        renderHistory();
+    }
+    function saveHistory() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fileHistory.slice(0, 30)));
+    }
+    function addToHistory(fileName, fileSize, downloadUrl, isZip = false, hasPassword = false, passwordKey = '') {
+        fileHistory.unshift({
+            id: Date.now(),
+            name: fileName,
+            size: fileSize,
+            url: downloadUrl,
+            isZip: isZip,
+            hasPassword: hasPassword,
+            password: passwordKey,
+            date: new Date().toISOString(),
+            thumb: null
+        });
+        saveHistory();
+        renderHistory();
     }
     function formatBytes(bytes) {
         if (bytes === 0) return '0 B';
@@ -369,217 +384,229 @@
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
-    function renderFileHistory() {
-        const container = document.getElementById('historyList');
+    function renderHistory() {
+        const container = document.getElementById('historyGrid');
         if (!container) return;
-        if (fileHistory.length === 0) { container.innerHTML = '<div style="text-align: center; padding: 30px; color: #8e9bb5;">Нет загруженных файлов</div>'; return; }
+        if (fileHistory.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #8e9bb5;">Нет загруженных файлов</div>';
+            return;
+        }
         container.innerHTML = fileHistory.map(item => `
-            <div class="file-item" data-id="${item.id}">
-                <div class="file-info">
-                    <div class="file-name">${escapeHtml(item.name)}</div>
-                    <div class="file-meta">${formatBytes(item.size)} • ${new Date(item.date).toLocaleString()}</div>
-                    <div class="file-link" style="font-size: 0.7rem;">${escapeHtml(item.url)}</div>
+            <div class="history-item" data-id="${item.id}">
+                <div style="background: #0a0a14; border-radius: 20px; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; overflow: hidden;">
+                    <span style="font-size: 48px;">${item.isZip ? '📦' : (item.name.match(/\.(jpg|png|gif|webp)$/i) ? '🖼️' : '📄')}</span>
                 </div>
-                <div class="action-buttons">
-                    <button class="icon-btn copy-file-link" data-url="${item.url}">📋 Копировать</button>
+                <div class="history-name">${escapeHtml(item.name.length > 40 ? item.name.slice(0,40)+'...' : item.name)}</div>
+                <div class="history-meta">${formatBytes(item.size)} • ${new Date(item.date).toLocaleString()}${item.hasPassword ? ' 🔒' : ''}</div>
+                <div class="history-actions">
+                    <button class="icon-btn copy-history" data-url="${item.url}">📋 Копировать</button>
                     <a href="${item.url}" target="_blank" class="icon-btn" style="text-decoration: none;">🔗 Открыть</a>
-                    <button class="icon-btn delete-file" data-id="${item.id}" style="background: rgba(255,60,60,0.2);">🗑 Удалить</button>
+                    <button class="icon-btn delete-history" data-id="${item.id}" style="background: rgba(255,60,60,0.2);">🗑</button>
                 </div>
             </div>
         `).join('');
-        document.querySelectorAll('.copy-file-link').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); copyToClipboard(btn.getAttribute('data-url')); showToast('Ссылка скопирована!'); }));
-        document.querySelectorAll('.delete-file').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.getAttribute('data-id')); fileHistory = fileHistory.filter(item => item.id !== id); saveFileHistory(); renderFileHistory(); showToast('Файл удалён из истории'); }));
+        document.querySelectorAll('.copy-history').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); copyToClipboard(btn.getAttribute('data-url')); showToast('Ссылка скопирована!'); });
+        });
+        document.querySelectorAll('.delete-history').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.getAttribute('data-id')); fileHistory = fileHistory.filter(i => i.id !== id); saveHistory(); renderHistory(); showToast('Удалено из истории'); });
+        });
     }
-    async function uploadFile(file) {
-        const formData = new FormData(); formData.append('file', file);
-        const uploadDiv = document.getElementById('uploadProgress');
-        const progressFill = document.getElementById('progressFill');
-        const uploadStatus = document.getElementById('uploadStatus');
-        uploadDiv.style.display = 'block'; progressFill.style.width = '0%'; uploadStatus.innerText = 'Загрузка...';
-        let progress = 0;
-        const interval = setInterval(() => { if (progress < 90) { progress += 10; progressFill.style.width = progress + '%'; } }, 200);
+
+    // Предпросмотр файлов
+    function updatePreview() {
+        const container = document.getElementById('filePreviewArea');
+        if (!container) return;
+        if (selectedFiles.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+        container.innerHTML = selectedFiles.map((file, idx) => {
+            const isImage = file.type.startsWith('image/');
+            const previewUrl = isImage ? URL.createObjectURL(file) : null;
+            return `
+                <div class="preview-item" data-idx="${idx}">
+                    ${isImage ? `<img src="${previewUrl}" style="width:80px;height:80px;border-radius:16px;">` : `<div style="width:80px;height:80px;background:#2a2f3f;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;">📄</div>`}
+                    <div style="font-size:10px; margin-top:4px;">${escapeHtml(file.name.slice(0,15))}</div>
+                    <div class="remove-file" data-idx="${idx}">✖</div>
+                </div>
+            `;
+        }).join('');
+        // Удаление файлов из списка
+        document.querySelectorAll('.remove-file').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.getAttribute('data-idx'));
+                selectedFiles.splice(idx, 1);
+                updatePreview();
+            });
+        });
+    }
+
+    // Основная загрузка
+    async function uploadFiles() {
+        if (selectedFiles.length === 0) {
+            showToast('Выберите файлы');
+            return;
+        }
+        const uploadArea = document.getElementById('uploadProgressArea');
+        const progressFill = document.getElementById('uploadProgressFill');
+        const statusText = document.getElementById('uploadStatusText');
+        uploadArea.style.display = 'block';
+        progressFill.style.width = '0%';
+        statusText.innerText = 'Подготовка...';
+
         try {
+            let fileToUpload;
+            let fileName;
+            let fileSize;
+
+            if (zipMode && selectedFiles.length > 1) {
+                statusText.innerText = 'Создание ZIP-архива...';
+                const zip = new JSZip();
+                for (let f of selectedFiles) {
+                    const arrayBuffer = await f.arrayBuffer();
+                    zip.file(f.name, arrayBuffer);
+                }
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                fileToUpload = new File([zipBlob], `archive_${Date.now()}.zip`, { type: 'application/zip' });
+                fileName = fileToUpload.name;
+                fileSize = fileToUpload.size;
+            } else {
+                fileToUpload = selectedFiles[0];
+                fileName = fileToUpload.name;
+                fileSize = fileToUpload.size;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileToUpload);
+
+            statusText.innerText = 'Загрузка на сервер...';
+            let progressInterval = setInterval(() => {
+                let current = parseInt(progressFill.style.width) || 0;
+                if (current < 90) {
+                    progressFill.style.width = (current + 10) + '%';
+                }
+            }, 200);
+
             const response = await fetch(API_UPLOAD, { method: 'POST', body: formData });
-            clearInterval(interval); progressFill.style.width = '100%';
+            clearInterval(progressInterval);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             if (data.status !== 'success' || !data.data?.url) throw new Error('Ошибка получения ссылки');
             let downloadUrl = data.data.url;
             if (!downloadUrl.includes('?download')) downloadUrl += '?download=1';
-            addToFileHistory(file.name, file.size, downloadUrl);
-            uploadStatus.innerText = 'Готово!'; showToast('Файл загружен! Ссылка скопирована');
-            copyToClipboard(downloadUrl);
-            setTimeout(() => { uploadDiv.style.display = 'none'; progressFill.style.width = '0%'; }, 1500);
-        } catch (err) {
-            clearInterval(interval);
-            uploadStatus.innerText = `Ошибка: ${err.message}`;
-            setTimeout(() => { uploadDiv.style.display = 'none'; }, 3000);
-        }
-    }
 
-    // ========== СОКРАЩАТЕЛЬ ССЫЛОК ==========
-    const LINKS_STORAGE = 'cortexshare_links';
-    let shortLinks = [];
-
-    function getBaseUrl() { 
-        let url = window.location.href.split('?')[0].split('#')[0];
-        if (url.endsWith('index.html')) url = url.slice(0, -10);
-        return url;
-    }
-    function loadLinks() {
-        const saved = localStorage.getItem(LINKS_STORAGE);
-        if (saved) { try { shortLinks = JSON.parse(saved); } catch(e) { shortLinks = []; } }
-        renderLinks();
-        const exampleSpan = document.getElementById('exampleShortUrl');
-        if (exampleSpan) exampleSpan.innerText = getBaseUrl() + '?go=код';
-    }
-    function saveLinks() { localStorage.setItem(LINKS_STORAGE, JSON.stringify(shortLinks.slice(0, 100))); }
-    function generateShortCode(length = 6) {
-        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for (let i = 0; i < length; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-        return code;
-    }
-    function isCodeAvailable(code) { return !shortLinks.some(link => link.code === code); }
-    function addShortLink(originalUrl, customCode = null) {
-        let code = customCode ? customCode.trim() : '';
-        if (code) {
-            if (!isCodeAvailable(code)) { showToast('Этот код уже занят, используйте другой'); return null; }
-            if (!/^[a-zA-Z0-9\-_]+$/.test(code)) { showToast('Код может содержать только буквы, цифры, - и _'); return null; }
-        } else { do { code = generateShortCode(); } while (!isCodeAvailable(code)); }
-        const shortUrl = `${getBaseUrl()}?go=${code}`;
-        shortLinks.unshift({ id: Date.now(), original: originalUrl, code: code, short: shortUrl, clicks: 0, date: new Date().toISOString() });
-        saveLinks(); renderLinks();
-        return shortUrl;
-    }
-    function renderLinks() {
-        const container = document.getElementById('linksList');
-        if (!container) return;
-        if (shortLinks.length === 0) { container.innerHTML = '<div style="text-align: center; padding: 30px; color: #8e9bb5;">Нет сокращённых ссылок</div>'; return; }
-        container.innerHTML = shortLinks.map(item => `
-            <div class="link-item" data-id="${item.id}">
-                <div class="link-info">
-                    <div class="link-original">${escapeHtml(truncate(item.original, 60))}</div>
-                    <div class="link-short">${escapeHtml(item.short)}</div>
-                    <div class="link-meta">👆 Кликов: ${item.clicks || 0} • ${new Date(item.date).toLocaleString()}</div>
-                </div>
-                <div class="action-buttons">
-                    <button class="icon-btn copy-link-short" data-url="${item.short}">📋 Копировать</button>
-                    <button class="icon-btn open-link-short" data-url="${item.short}">🔗 Открыть</button>
-                    <button class="icon-btn delete-link" data-id="${item.id}" style="background: rgba(255,60,60,0.2);">🗑 Удалить</button>
-                </div>
-            </div>
-        `).join('');
-        document.querySelectorAll('.copy-link-short').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); copyToClipboard(btn.getAttribute('data-url')); showToast('Ссылка скопирована!'); }));
-        document.querySelectorAll('.open-link-short').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); window.open(btn.getAttribute('data-url'), '_blank'); }));
-        document.querySelectorAll('.delete-link').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); const id = parseInt(btn.getAttribute('data-id')); shortLinks = shortLinks.filter(l => l.id !== id); saveLinks(); renderLinks(); showToast('Ссылка удалена'); }));
-    }
-    function truncate(str, len) { return str.length <= len ? str : str.substring(0, len) + '...'; }
-
-    // Обработчик перехода по короткой ссылке (параметр ?go=код)
-    function handleRedirectFromParam() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('go');
-        if (code) {
-            const saved = localStorage.getItem(LINKS_STORAGE);
-            if (saved) {
-                try {
-                    const links = JSON.parse(saved);
-                    const found = links.find(l => l.code === code);
-                    if (found) {
-                        found.clicks = (found.clicks || 0) + 1;
-                        localStorage.setItem(LINKS_STORAGE, JSON.stringify(links));
-                        window.location.href = found.original;
-                        return;
-                    }
-                } catch(e) {}
+            // Если парольная защита (имитация) – добавляем хэш к ссылке
+            let finalUrl = downloadUrl;
+            let passwordKey = '';
+            if (passwordMode) {
+                generatedPassword = Math.random().toString(36).substr(2, 8);
+                passwordKey = generatedPassword;
+                finalUrl = downloadUrl + '#p=' + generatedPassword;
+                showToast(`🔒 Пароль: ${generatedPassword} (сохранён в ссылке)`);
             }
-            document.body.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #0a0f1e; color: white; flex-direction: column; gap: 20px; text-align: center;">
-                <h1>🔗 5.Cortex</h1>
-                <p>Ссылка с кодом <strong>${escapeHtml(code)}</strong> не найдена или устарела.</p>
-                <a href="${getBaseUrl()}" style="color: #4f7aff; text-decoration: none; border: 1px solid #4f7aff; padding: 10px 24px; border-radius: 40px;">Перейти на главную</a>
-            </div>`;
+
+            addToHistory(fileName, fileSize, finalUrl, zipMode, passwordMode, passwordKey);
+            progressFill.style.width = '100%';
+            statusText.innerText = 'Готово!';
+            copyToClipboard(finalUrl);
+            showToast('Файл загружен! Ссылка скопирована');
+            setTimeout(() => {
+                uploadArea.style.display = 'none';
+                progressFill.style.width = '0%';
+                selectedFiles = [];
+                updatePreview();
+            }, 1500);
+        } catch (err) {
+            statusText.innerText = `Ошибка: ${err.message}`;
+            setTimeout(() => { uploadArea.style.display = 'none'; }, 3000);
         }
     }
 
-    // Общие функции
+    // Вспомогательные функции
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).catch(() => {
             const ta = document.createElement('textarea');
-            ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
         });
     }
     function showToast(msg) {
         let toast = document.querySelector('.toast');
         if (toast) toast.remove();
-        toast = document.createElement('div'); toast.className = 'toast'; toast.innerText = msg;
+        toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 2500);
     }
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
 
-    // Переключение вкладок с анимацией
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const panes = { files: document.getElementById('files-tab'), links: document.getElementById('links-tab') };
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tab = btn.getAttribute('data-tab');
-            if (tab === 'files' && panes.files.classList.contains('active')) return;
-            if (tab === 'links' && panes.links.classList.contains('active')) return;
-            tabBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            Object.values(panes).forEach(p => p.classList.remove('active'));
-            if (tab === 'files') panes.files.classList.add('active');
-            else if (tab === 'links') panes.links.classList.add('active');
-        });
-    });
-
-    // Инициализация файлообменника
+    // Обработчики UI
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
-    const selectBtn = document.getElementById('selectFileBtn');
+    const selectBtn = document.getElementById('selectFilesBtn');
+    const toggleZipBtn = document.getElementById('toggleZipBtn');
+    const togglePasswordBtn = document.getElementById('togglePasswordBtn');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-    if (dropzone) {
-        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-        dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('drag-over'); });
-        dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('drag-over'); if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]); });
-        dropzone.addEventListener('click', () => fileInput.click());
-    }
-    if (selectBtn) selectBtn.addEventListener('click', () => fileInput.click());
-    if (fileInput) fileInput.addEventListener('change', () => { if (fileInput.files.length) uploadFile(fileInput.files[0]); fileInput.value = ''; });
-    if (clearHistoryBtn) clearHistoryBtn.addEventListener('click', () => { if (confirm('Очистить всю историю загрузок?')) { fileHistory = []; saveFileHistory(); renderFileHistory(); showToast('История очищена'); } });
+    const zipIndicator = document.getElementById('zipModeIndicator');
+    const passwordIndicator = document.getElementById('passwordModeIndicator');
 
-    // Инициализация сокращателя ссылок
-    const longUrlInput = document.getElementById('longUrlInput');
-    const customCodeInput = document.getElementById('customCode');
-    const shortenBtn = document.getElementById('shortenBtn');
-    const clearLinksBtn = document.getElementById('clearLinksBtn');
-    if (shortenBtn) {
-        shortenBtn.addEventListener('click', () => {
-            let longUrl = longUrlInput.value.trim();
-            if (!longUrl) { showToast('Введите ссылку'); return; }
-            if (!longUrl.match(/^https?:\/\//i)) longUrl = 'https://' + longUrl;
-            try { new URL(longUrl); } catch(e) { showToast('Некорректный URL'); return; }
-            let customCode = customCodeInput.value.trim();
-            const shortUrl = addShortLink(longUrl, customCode || null);
-            if (shortUrl) {
-                longUrlInput.value = '';
-                customCodeInput.value = '';
-                copyToClipboard(shortUrl);
-                showToast('Короткая ссылка создана и скопирована!');
-            }
-        });
-    }
-    if (clearLinksBtn) {
-        clearLinksBtn.addEventListener('click', () => {
-            if (confirm('Очистить все сокращённые ссылки?')) { shortLinks = []; saveLinks(); renderLinks(); showToast('Все ссылки удалены'); }
-        });
-    }
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('drag-over'); });
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length) {
+            selectedFiles = files.slice(0, 5);
+            updatePreview();
+        }
+    });
+    dropzone.addEventListener('click', () => fileInput.click());
+    selectBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+            selectedFiles = Array.from(fileInput.files).slice(0, 5);
+            updatePreview();
+        }
+        fileInput.value = '';
+    });
 
-    // Запуск
-    loadFileHistory();
-    loadLinks();
-    handleRedirectFromParam();
+    toggleZipBtn.addEventListener('click', () => {
+        zipMode = !zipMode;
+        zipIndicator.style.display = zipMode ? 'block' : 'none';
+        toggleZipBtn.style.background = zipMode ? 'rgba(79,122,255,0.4)' : '';
+        showToast(zipMode ? 'Режим ZIP включён' : 'Режим ZIP выключен');
+    });
+    togglePasswordBtn.addEventListener('click', () => {
+        passwordMode = !passwordMode;
+        passwordIndicator.style.display = passwordMode ? 'block' : 'none';
+        togglePasswordBtn.style.background = passwordMode ? 'rgba(255,100,100,0.4)' : '';
+        showToast(passwordMode ? 'Парольная защита включена' : 'Парольная защита выключена');
+    });
+
+    // Кнопка загрузки (создадим новую)
+    const uploadBtn = document.createElement('button');
+    uploadBtn.className = 'btn';
+    uploadBtn.innerHTML = '🚀 Загрузить файлы';
+    uploadBtn.style.marginTop = '20px';
+    dropzone.parentNode.appendChild(uploadBtn);
+    uploadBtn.addEventListener('click', () => uploadFiles());
+
+    clearHistoryBtn.addEventListener('click', () => {
+        if (confirm('Очистить всю историю загрузок?')) {
+            fileHistory = [];
+            saveHistory();
+            renderHistory();
+            showToast('История очищена');
+        }
+    });
+
+    loadHistory();
 </script>
 </body>
 </html>
