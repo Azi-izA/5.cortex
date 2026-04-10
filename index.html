@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>5.Cortex — Файлообменник + Сокращатель ссылок</title>
+    <title>5.Cortex — Файлообменник + Сокращатель ссылок (рабочий)</title>
     <style>
         * {
             margin: 0;
@@ -24,7 +24,6 @@
             margin: 0 auto;
         }
 
-        /* Glassmorphism */
         .glass-card {
             background: rgba(20, 25, 40, 0.7);
             backdrop-filter: blur(12px);
@@ -52,7 +51,6 @@
             padding-left: 14px;
         }
 
-        /* Вкладки */
         .tabs {
             display: flex;
             gap: 16px;
@@ -83,7 +81,6 @@
             display: block;
         }
 
-        /* Зона загрузки файлов */
         .dropzone {
             border: 2px dashed rgba(79, 122, 255, 0.5);
             border-radius: 28px;
@@ -247,12 +244,12 @@
 <div class="container">
     <div class="glass-card" style="text-align: center; padding-bottom: 20px;">
         <h1>⚡ 5.Cortex Tools</h1>
-        <div class="sub">Файлообменник + Сокращатель ссылок</div>
+        <div class="sub">Файлообменник + Сокращатель ссылок (рабочие ссылки на вашем домене)</div>
     </div>
 
     <div class="tabs">
         <button class="tab-btn active" data-tab="files">📁 Файлообменник</button>
-        <button class="tab-btn" data-tab="links">🔗 Сокращатель ссылок (5.cortex.clck)</button>
+        <button class="tab-btn" data-tab="links">🔗 Сокращатель ссылок</button>
     </div>
 
     <!-- Панель файлообменника -->
@@ -288,11 +285,12 @@
             <div class="url-input-group">
                 <input type="text" id="longUrlInput" placeholder="Введите длинную ссылку (https://...)" style="flex: 2;">
                 <div class="custom-code">
-                    <span>5.cortex.clck/</span>
+                    <span>5.cortex/</span>
                     <input type="text" id="customCode" placeholder="код" maxlength="30">
                 </div>
                 <button id="shortenBtn" class="btn">Сократить</button>
             </div>
+            <p style="font-size: 0.75rem; color: #8e9bb5; margin-top: 8px;">Короткая ссылка будет вида: <span id="exampleShortUrl">https://azi-iza.github.io/5.cortex/go/код</span></p>
         </div>
 
         <div class="glass-card">
@@ -309,7 +307,6 @@
     // ==================== ФАЙЛООБМЕННИК ====================
     const API_UPLOAD = 'https://tmpfiles.org/api/v1/upload';
     const STORAGE_KEY = 'cortexshare_files';
-
     let fileHistory = [];
 
     function loadFileHistory() {
@@ -426,9 +423,14 @@
         }
     }
 
-    // ==================== СОКРАЩАТЕЛЬ ССЫЛОК ====================
+    // ==================== СОКРАЩАТЕЛЬ ССЫЛОК (работает на текущем домене) ====================
     const LINKS_STORAGE = 'cortexshare_links';
     let shortLinks = [];
+
+    function getBaseUrl() {
+        // Получаем базовый URL текущей страницы без хэша
+        return window.location.href.split('#')[0].replace(/\/$/, '');
+    }
 
     function loadLinks() {
         const saved = localStorage.getItem(LINKS_STORAGE);
@@ -436,6 +438,11 @@
             try { shortLinks = JSON.parse(saved); } catch(e) { shortLinks = []; }
         }
         renderLinks();
+        // Обновить пример ссылки в подсказке
+        const exampleSpan = document.getElementById('exampleShortUrl');
+        if (exampleSpan) {
+            exampleSpan.innerText = getBaseUrl() + '/go/код';
+        }
     }
 
     function saveLinks() {
@@ -469,7 +476,8 @@
         } else {
             do { code = generateShortCode(); } while (!isCodeAvailable(code));
         }
-        const shortUrl = `https://5.cortex.clck/${code}`;
+        const base = getBaseUrl();
+        const shortUrl = `${base}/go/${code}`;
         shortLinks.unshift({
             id: Date.now(),
             original: originalUrl,
@@ -516,16 +524,8 @@
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const url = btn.getAttribute('data-url');
-                // симуляция перехода — открываем оригинальный URL
-                const linkItem = shortLinks.find(l => l.short === url);
-                if (linkItem) {
-                    linkItem.clicks = (linkItem.clicks || 0) + 1;
-                    saveLinks();
-                    renderLinks();
-                    window.open(linkItem.original, '_blank');
-                } else {
-                    window.open(url, '_blank');
-                }
+                // открываем в новой вкладке — перенаправление обработает redirect.js
+                window.open(url, '_blank');
             });
         });
         document.querySelectorAll('.delete-link').forEach(btn => {
@@ -543,6 +543,38 @@
     function truncate(str, len) {
         if (str.length <= len) return str;
         return str.substring(0, len) + '...';
+    }
+
+    // ==================== ОБРАБОТЧИК ПЕРЕХОДА ПО КОРОТКОЙ ССЫЛКЕ ====================
+    // Эта функция выполняется при загрузке страницы и проверяет путь /go/код
+    function handleRedirect() {
+        const path = window.location.pathname;
+        const match = path.match(/\/go\/([a-zA-Z0-9\-_]+)$/);
+        if (match) {
+            const code = match[1];
+            // Загружаем ссылки из localStorage и ищем совпадение
+            const saved = localStorage.getItem(LINKS_STORAGE);
+            if (saved) {
+                try {
+                    const links = JSON.parse(saved);
+                    const found = links.find(l => l.code === code);
+                    if (found) {
+                        // Увеличиваем счётчик кликов
+                        found.clicks = (found.clicks || 0) + 1;
+                        localStorage.setItem(LINKS_STORAGE, JSON.stringify(links));
+                        // Перенаправляем на оригинальный URL
+                        window.location.href = found.original;
+                        return;
+                    }
+                } catch(e) {}
+            }
+            // Если ссылка не найдена, показываем сообщение
+            document.body.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #0a0f1e; color: white; flex-direction: column; gap: 20px;">
+                <h1>🔗 5.Cortex</h1>
+                <p>Ссылка с кодом <strong>${escapeHtml(code)}</strong> не найдена или устарела.</p>
+                <a href="/" style="color: #4f7aff;">Перейти на главную</a>
+            </div>`;
+        }
     }
 
     // Общие утилиты
@@ -651,8 +683,10 @@
         });
     }
 
+    // Запуск
     loadFileHistory();
     loadLinks();
+    handleRedirect(); // обрабатываем переход по короткой ссылке, если он был
 </script>
 </body>
 </html>
