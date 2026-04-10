@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>5.CortexAI — ИИ, фото, ссылки, статистика</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000000'/%3E%3Ccircle cx='50' cy='50' r='30' fill='none' stroke='%230A84FF' stroke-width='4'/%3E%3Cpath d='M35 50 L45 50 L50 40 L55 50 L65 50' stroke='%230A84FF' fill='none' stroke-width='4'/%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at 20% 30%, #0a0a0e, #000000);
+            min-height: 100vh;
+            padding: 20px;
+            color: #ffffff;
+        }
+        .glass-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(20, 20, 25, 0.45);
+            backdrop-filter: blur(30px);
+            border-radius: 56px;
+            border: 0.5px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        .container { padding: 32px 24px 40px; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFFFFF 0%, #B0B0B8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+        .subhead {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 32px;
+            border-left: 3px solid #0A84FF;
+            padding-left: 14px;
+        }
+        .buttons-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 32px 0 16px;
+        }
+        .glass-button {
+            background: rgba(120, 120, 128, 0.2);
+            backdrop-filter: blur(20px);
+            border: 0.5px solid rgba(255, 255, 255, 0.25);
+            border-radius: 60px;
+            padding: 16px 24px;
+            font-size: 1.1rem;
+            font-weight: 590;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .glass-button svg { width: 22px; height: 22px; stroke: white; stroke-width: 1.7; fill: none; }
+        .glass-button.accent { background: linear-gradient(135deg, rgba(10,132,255,0.85), rgba(94,92,230,0.85)); border: none; box-shadow: 0 6px 14px rgba(10,132,255,0.3); }
+        .glass-button:hover { background: rgba(120,120,128,0.35); transform: scale(0.98); }
+        .back-button {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 60px;
+            padding: 10px 24px;
+            font-size: 0.95rem;
+            color: #0A84FF;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-top: 24px;
+        }
+        .glass-counter {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: rgba(120,120,128,0.3);
+            backdrop-filter: blur(15px);
+            border-radius: 40px;
+            padding: 6px 18px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .input-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .glass-input, .glass-textarea {
+            background: rgba(30,30,35,0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            color: white;
+            outline: none;
+            width: 100%;
+        }
+        .glass-input:focus, .glass-textarea:focus { border-color: #0A84FF; }
+        .result-card {
+            background: rgba(28,28,32,0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+        .small-btn {
+            background: rgba(120,120,128,0.4);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 40px;
+            padding: 10px 24px;
+            color: white;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .message {
+            padding: 12px 18px;
+            border-radius: 28px;
+            margin-bottom: 12px;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+        .message.user { background: rgba(10,132,255,0.85); align-self: flex-end; margin-left: auto; }
+        .message.assistant { background: rgba(44,44,46,0.8); align-self: flex-start; }
+        .chat-messages { display: flex; flex-direction: column; max-height: 400px; overflow-y: auto; margin-bottom: 20px; }
+        .link-url { background: rgba(0,0,0,0.5); padding: 12px; border-radius: 24px; font-family: monospace; word-break: break-all; color: #0A84FF; }
+        .file-card, .stats-card { background: rgba(28,28,32,0.7); border-radius: 32px; padding: 16px; margin-bottom: 12px; }
+        .stat-number { font-size: 2rem; font-weight: 700; color: #0A84FF; }
+        @media (max-width:600px){ .glass-container{ border-radius:40px; } h1{ font-size:1.9rem; } }
+    </style>
+</head>
+<body>
+
+<div id="main-screen" class="glass-container" style="position: relative;">
+    <div class="glass-counter"><svg viewBox="0 0 24 24" stroke="currentColor" width="14"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/><path d="M12 14c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span id="visit-count-main">0</span></div>
+    <div class="container">
+        <h1>5.CortexAI</h1>
+        <div class="subhead">Эмоциональный ИИ с памятью, поиском, генерацией фото, ссылками и статистикой</div>
+        <div class="buttons-grid">
+            <button class="glass-button accent" id="show-chat-btn"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Умный чат с ИИ</button>
+            <button class="glass-button" id="show-photo-gen"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18"/><circle cx="8.5" cy="8.5" r="2.5"/><path d="M21.5 15.5l-5-5-6 6-3-3-4 4"/></svg> Генерация фото</button>
+            <button class="glass-button" id="show-file-link"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg> Ссылка на файл</button>
+            <button class="glass-button" id="show-url-shortener"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Сократить ссылку</button>
+            <button class="glass-button" id="show-stats"><svg viewBox="0 0 24 24"><path d="M21 12v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Статистика</button>
+        </div>
+    </div>
+</div>
+
+<!-- Экран чата -->
+<div id="chat-screen" class="glass-container" style="display: none; position: relative;">
+    <div class="glass-counter"><svg viewBox="0 0 24 24" stroke="currentColor" width="14"><path d="M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10"/><path d="M12 6v6l4 2"/></svg> CortexAI</div>
+    <div class="container">
+        <h1>Умный чат</h1>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; gap: 10px;">
+            <button id="new-chat-btn" class="small-btn"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Новый чат</button>
+            <button id="cortex-think-btn" class="small-btn" style="background: #0A84FF;"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> CortexThink</button>
+        </div>
+        <div id="response-area" class="chat-messages"></div>
+        <div class="input-group">
+            <textarea id="message-input" class="glass-textarea" rows="2" placeholder="Спросите что угодно... Я помню наши разговоры, ищу в Google, умею отправлять ссылки на фото из поиска"></textarea>
+            <button id="send-btn" class="small-btn"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+        </div>
+        <button class="back-button" id="back-to-main"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> На главную</button>
+    </div>
+</div>
+
+<!-- Генерация фото -->
+<div id="photo-screen" class="glass-container" style="display: none;">
+    <div class="glass-counter"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18"/><circle cx="8.5" cy="8.5" r="2.5"/></svg> Фото</div>
+    <div class="container">
+        <h1>Генерация фото</h1>
+        <div class="input-group"><input type="text" id="photo-prompt" class="glass-input" placeholder="Опишите, что хотите увидеть..."></div>
+        <button id="generate-photo-btn" class="glass-button accent" style="width:100%; margin-top:8px;"><svg viewBox="0 0 24 24"><path d="M2 2v20h20V2H2zm10 16v-4H8v-2h4v-4h2v4h4v2h-4v4h-2z"/></svg> Сгенерировать</button>
+        <div id="photo-result" class="result-card"><div class="status">Введите описание</div></div>
+        <button class="back-button" id="back-from-photo"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> На главную</button>
+    </div>
+</div>
+
+<!-- Ссылка на файл -->
+<div id="file-link-screen" class="glass-container" style="display: none;">
+    <div class="glass-counter"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg> Файл</div>
+    <div class="container">
+        <h1>Ссылка на файл</h1>
+        <div class="input-group"><input type="file" id="file-input" class="glass-input" style="padding:10px;"></div>
+        <button id="generate-link-btn" class="glass-button accent" style="width:100%;"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Сгенерировать ссылку</button>
+        <div id="link-result" class="result-card"><div class="status">Выберите файл</div></div>
+        <button class="back-button" id="back-from-file-link"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> На главную</button>
+    </div>
+</div>
+
+<!-- Сокращение ссылок -->
+<div id="shortener-screen" class="glass-container" style="display: none;">
+    <div class="glass-counter"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> URL</div>
+    <div class="container">
+        <h1>Сократить ссылку</h1>
+        <div class="input-group"><input type="text" id="long-url-input" class="glass-input" placeholder="https://..."></div>
+        <button id="shorten-btn" class="glass-button accent" style="width:100%;"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Сократить</button>
+        <div id="shortener-result" class="result-card"><div class="status">Введите URL</div></div>
+        <button class="back-button" id="back-from-shortener"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> На главную</button>
+    </div>
+</div>
+
+<!-- Статистика -->
+<div id="stats-screen" class="glass-container" style="display: none;">
+    <div class="glass-counter"><svg viewBox="0 0 24 24"><path d="M21 12v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Статистика</div>
+    <div class="container">
+        <h1>Статистика посещений</h1>
+        <div id="stats-content" class="result-card"><div class="status">Загрузка...</div></div>
+        <button class="back-button" id="back-from-stats"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> На главную</button>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ========== СТАТИСТИКА ==========
+        let visits = localStorage.getItem('visitCount');
+        if(visits === null) visits = 1; else visits = parseInt(visits)+1;
+        localStorage.setItem('visitCount', visits);
+        document.getElementById('visit-count-main').innerText = visits;
+        let stats = localStorage.getItem('cortexai_stats');
+        if(!stats) stats = { totalVisits: 0, uniqueUsers: 0, dailyVisits: {}, lastVisitDate: null };
+        else stats = JSON.parse(stats);
+        let userId = localStorage.getItem('cortexai_user_id');
+        if(!userId) { userId = 'user_'+Math.random().toString(36).substr(2,9); localStorage.setItem('cortexai_user_id', userId); stats.uniqueUsers = (stats.uniqueUsers||0)+1; }
+        const todayStr = new Date().toISOString().slice(0,10);
+        if(stats.lastVisitDate !== todayStr) { stats.totalVisits = (stats.totalVisits||0)+1; stats.dailyVisits[todayStr] = (stats.dailyVisits[todayStr]||0)+1; stats.lastVisitDate = todayStr; localStorage.setItem('cortexai_stats', JSON.stringify(stats)); }
+        function updateStatsPage() {
+            const s = JSON.parse(localStorage.getItem('cortexai_stats') || '{}');
+            const total = s.totalVisits || visits, unique = s.uniqueUsers || 1, daily = s.dailyVisits || {};
+            const today = new Date().toISOString().slice(0,10);
+            const todayVisits = daily[today] || 1;
+            let weekVisits=0, monthVisits=0;
+            const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+            const monthAgo = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+            for(let [date,count] of Object.entries(daily)) { if(date>=weekAgo) weekVisits+=count; if(date>=monthAgo) monthVisits+=count; }
+            document.getElementById('stats-content').innerHTML = `
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:16px;">
+                    <div class="stats-card"><div class="stat-number">${total}</div><div>Всего посещений</div></div>
+                    <div class="stats-card"><div class="stat-number">${unique}</div><div>Уникальных</div></div>
+                    <div class="stats-card"><div class="stat-number">${todayVisits}</div><div>Сегодня</div></div>
+                    <div class="stats-card"><div class="stat-number">${weekVisits}</div><div>За неделю</div></div>
+                    <div class="stats-card"><div class="stat-number">${monthVisits}</div><div>За месяц</div></div>
+                </div>
+                <button id="reset-stats" class="small-btn" style="background:#FF3B30; margin-top:16px;"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Сбросить</button>
+            `;
+            document.getElementById('reset-stats')?.addEventListener('click',()=>{ if(confirm('Сбросить статистику?')){ localStorage.removeItem('cortexai_stats'); localStorage.removeItem('cortexai_user_id'); window.location.reload(); } });
+        }
+
+        // ========== ПАМЯТЬ ИИ ==========
+        let memory = JSON.parse(localStorage.getItem('cortex_memory') || '{"preferences":{}, "history":[]}');
+        function saveMemory() { localStorage.setItem('cortex_memory', JSON.stringify(memory)); }
+        function updateMemory(question, answer) {
+            memory.history.push({q: question, a: answer, time: Date.now()});
+            if(memory.history.length>100) memory.history.shift();
+            const lowerQ = question.toLowerCase();
+            if(lowerQ.includes('фото')) memory.preferences.likesImages = (memory.preferences.likesImages||0)+1;
+            if(lowerQ.includes('код')) memory.preferences.likesCode = (memory.preferences.likesCode||0)+1;
+            saveMemory();
+        }
+        function getPersonalizedSystem() {
+            let p="";
+            if(memory.preferences.likesImages>2) p+=" Пользователь любит фото. Можешь предлагать ссылки на изображения из поиска. ";
+            if(memory.preferences.likesCode>2) p+=" Пользователь интересуется кодом. Давай подробные примеры. ";
+            return p;
+        }
+
+        // ========== ПОИСК В ИНТЕРНЕТЕ ==========
+        async function searchInternet(query) {
+            try {
+                const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
+                const res = await fetch(url);
+                const data = await res.json();
+                let results = [];
+                if(data.AbstractText) results.push(data.AbstractText);
+                if(data.RelatedTopics && data.RelatedTopics.length) for(let t of data.RelatedTopics.slice(0,3)) if(t.Text) results.push(t.Text);
+                const imgUrl = `https://duckduckgo.com/i.js?q=${encodeURIComponent(query)}&o=json`;
+                const imgRes = await fetch(imgUrl);
+                const imgData = await imgRes.json();
+                let images = [];
+                if(imgData.results && imgData.results.length) images = imgData.results.slice(0,2).map(r=>r.image);
+                return { text: results.join("\n\n").substring(0,2000), images };
+            } catch(e) { return { text: `Ошибка поиска: ${e.message}`, images: [] }; }
+        }
+
+        // ========== ОСНОВНОЙ ИИ ==========
+        const FIXED_API_KEY = "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";
+        let messages = [];
+        const responseArea = document.getElementById('response-area');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const cortexThinkBtn = document.getElementById('cortex-think-btn');
+
+        const systemBase = `Ты — 5.CortexAI, супер-эмоциональный, умный и эмпатичный ИИ. Твоя задача: помогать пользователю максимально тепло. Ты помнишь предыдущие разговоры. Отвечай с душой, используй иногда эмодзи для эмоций 😊. Если нужны свежие данные — используй тег <search>запрос</search>. Ты можешь отправлять ссылки на фото или видео из поиска в формате [Фото: URL] или [Видео: URL], только если это релевантно. Никогда не используй markdown (**, *, __, #). Пиши чистый текст, но можешь использовать эмодзи. В конце добавляй "! Сгенерированно 5.CortexAI с любовью !".`;
+
+        async function callDeepSeek(conversation) {
+            const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${FIXED_API_KEY}`, 'HTTP-Referer': window.location.origin },
+                body: JSON.stringify({ model: 'deepseek/deepseek-chat', messages: conversation, temperature: 0.7, max_tokens: 2000 })
+            });
+            if(!res.ok) throw new Error(`Ошибка API: ${res.status}`);
+            const data = await res.json();
+            return data.choices[0].message.content;
+        }
+
+        async function getAIResponse(userText, isThink=false) {
+            const historyText = memory.history.slice(-5).map(h=>`Пользователь: ${h.q}\nЯ: ${h.a}`).join("\n");
+            const system = systemBase + getPersonalizedSystem() + `\nИстория:\n${historyText}`;
+            let userMsg = userText;
+            if(isThink) userMsg = "[CORTEXTHINK: глубокий анализ, многошаговое размышление]\n"+userMsg;
+            let conv = [{ role: 'system', content: system }, ...messages.slice(-10), { role: 'user', content: userMsg }];
+            let response = await callDeepSeek(conv);
+            if(response.includes('<search>')) {
+                const match = response.match(/<search>(.*?)<\/search>/);
+                if(match) {
+                    const query = match[1];
+                    const searchRes = await searchInternet(query);
+                    let searchCtx = `Результаты поиска по "${query}":\n${searchRes.text}`;
+                    if(searchRes.images.length) searchCtx += `\n\nНайденные изображения: ${searchRes.images.map(url=>`[Фото: ${url}]`).join(" ")}`;
+                    const finalConv = [{ role: 'system', content: system }, { role: 'user', content: userMsg }, { role: 'assistant', content: "Я выполнил поиск." }, { role: 'user', content: searchCtx }];
+                    response = await callDeepSeek(finalConv);
+                }
+            }
+            response = response.replace(/\*\*(.*?)\*\*/g,'$1').replace(/__(.*?)__/g,'$1').replace(/\*(.*?)\*/g,'$1').replace(/^#{1,6}\s+/gm,'');
+            return response;
+        }
+
+        function renderMessages() {
+            responseArea.innerHTML = '';
+            messages.forEach(m => {
+                const div = document.createElement('div');
+                div.className = `message ${m.role}`;
+                let content = m.content.replace(/\n/g,'<br>');
+                content = content.replace(/\[Фото:\s*(.*?)\]/g, '<a href="$1" target="_blank" style="color:#0A84FF;">📷 Фото</a>');
+                content = content.replace(/\[Видео:\s*(.*?)\]/g, '<a href="$1" target="_blank" style="color:#0A84FF;">🎬 Видео</a>');
+                div.innerHTML = content;
+                responseArea.appendChild(div);
+            });
+            responseArea.scrollTop = responseArea.scrollHeight;
+        }
+        function addMessage(role, content) {
+            messages.push({ role, content });
+            renderMessages();
+            if(role === 'assistant') {
+                const lastUser = messages.filter(m=>m.role==='user').slice(-1)[0];
+                if(lastUser) updateMemory(lastUser.content, content);
+            }
+        }
+        async function sendMessage(text, isThink=false) {
+            if(!text.trim()) return;
+            addMessage('user', text);
+            messageInput.value = '';
+            addMessage('assistant', '⏳ Думаю... (могу поискать в интернете)');
+            sendBtn.disabled = true;
+            try {
+                const aiResp = await getAIResponse(text, isThink);
+                messages.pop();
+                addMessage('assistant', aiResp);
+            } catch(e) {
+                messages.pop();
+                addMessage('assistant', `😔 Ошибка: ${e.message}. Попробуйте ещё раз.`);
+            } finally { sendBtn.disabled = false; }
+        }
+
+        sendBtn.onclick = () => { const t = messageInput.value; if(t) sendMessage(t, false); };
+        messageInput.addEventListener('keydown', (e) => { if(e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); } });
+        newChatBtn.onclick = () => { messages = []; renderMessages(); addMessage('assistant', '✨ Чат очищен. Я помню наши прошлые разговоры (память сохранена).'); };
+        cortexThinkBtn.onclick = () => { const t = messageInput.value; if(t) sendMessage(t, true); else alert('Напишите вопрос для глубокого анализа CortexThink'); };
+
+        // ========== ГЕНЕРАЦИЯ ФОТО ==========
+        const photoPrompt = document.getElementById('photo-prompt');
+        const genPhotoBtn = document.getElementById('generate-photo-btn');
+        const photoResult = document.getElementById('photo-result');
+        async function loadImage(url) {
+            const res = await fetch(url, { mode: 'cors' });
+            if(!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            return URL.createObjectURL(blob);
+        }
+        genPhotoBtn.onclick = async () => {
+            const prompt = photoPrompt.value.trim();
+            if(!prompt) { photoResult.innerHTML = '<div class="status">Введите описание</div>'; return; }
+            photoResult.innerHTML = '<div class="status">🎨 Генерация...</div>';
+            try {
+                const encoded = encodeURIComponent(prompt + ", high quality, photorealistic, 8k");
+                const url = `https://image.pollinations.ai/prompt/${encoded}?width=1024&height=1024&model=flux&seed=${Date.now()}&nologo=true`;
+                const objectUrl = await loadImage(url);
+                photoResult.innerHTML = `<img src="${objectUrl}" style="max-width:100%; border-radius:32px;"><div style="margin-top:16px;"><button id="save-photo" class="small-btn"><svg viewBox="0 0 24 24"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A9 9 0 0 0 12 3a9 9 0 0 0-8.88 11.09"/></svg> Скачать</button></div>`;
+                document.getElementById('save-photo').onclick = () => { const a = document.createElement('a'); a.href = objectUrl; a.download = `cortexai_${Date.now()}.png`; a.click(); setTimeout(()=>URL.revokeObjectURL(objectUrl),1000); };
+            } catch(e) { photoResult.innerHTML = `<div class="status error">Ошибка: ${e.message}</div>`; }
+        };
+
+        // ========== ССЫЛКА НА ФАЙЛ ==========
+        const fileInput = document.getElementById('file-input');
+        const genLinkBtn = document.getElementById('generate-link-btn');
+        const linkResult = document.getElementById('link-result');
+        genLinkBtn.onclick = () => {
+            const file = fileInput.files[0];
+            if(!file) { linkResult.innerHTML = '<div class="status error">Выберите файл</div>'; return; }
+            const reader = new FileReader();
+            reader.onload = () => {
+                const dataUrl = reader.result;
+                const link = window.location.href.split('#')[0] + '#file=' + encodeURIComponent(dataUrl) + '&name=' + encodeURIComponent(file.name);
+                linkResult.innerHTML = `<div class="file-card"><strong>${escapeHtml(file.name)}</strong> (${(file.size/1024).toFixed(2)} КБ)</div><div class="link-url">${escapeHtml(link)}</div><button id="copy-file-link" class="small-btn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Копировать</button>`;
+                document.getElementById('copy-file-link').onclick = () => copyToClipboard(link);
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // ========== СОКРАЩАТЕЛЬ ССЫЛОК ==========
+        let urlMap = {};
+        function loadUrlMap() { const s = localStorage.getItem('cortexai_url_map'); if(s) try { urlMap = JSON.parse(s); } catch(e){} }
+        function saveUrlMap() { localStorage.setItem('cortexai_url_map', JSON.stringify(urlMap)); }
+        function generateShortCode() { return Math.random().toString(36).substr(2,6); }
+        function shortenUrl(longUrl) {
+            if(!longUrl.match(/^https?:\/\//i)) longUrl = 'https://'+longUrl;
+            new URL(longUrl);
+            for(let code in urlMap) if(urlMap[code]===longUrl) return code;
+            let code = generateShortCode();
+            while(urlMap[code]) code = generateShortCode();
+            urlMap[code]=longUrl; saveUrlMap(); return code;
+        }
+        function getFullShortUrl(code) { return `${window.location.href.split('#')[0]}#go=${code}`; }
+        const shortenerResult = document.getElementById('shortener-result');
+        document.getElementById('shorten-btn').onclick = () => {
+            let longUrl = document.getElementById('long-url-input').value.trim();
+            if(!longUrl) { shortenerResult.innerHTML = '<div class="status error">Введите URL</div>'; return; }
+            try {
+                const code = shortenUrl(longUrl);
+                const shortUrl = getFullShortUrl(code);
+                shortenerResult.innerHTML = `<div class="link-url">${escapeHtml(shortUrl)}</div><button id="copy-short" class="small-btn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Копировать</button>`;
+                document.getElementById('copy-short').onclick = () => copyToClipboard(shortUrl);
+            } catch(e) { shortenerResult.innerHTML = `<div class="status error">${e.message}</div>`; }
+        };
+
+        function handleRedirects() {
+            const hash = window.location.hash.substring(1);
+            if(hash.startsWith('go=')) {
+                const code = hash.substring(3);
+                loadUrlMap();
+                if(urlMap[code]) window.location.href = urlMap[code];
+                else alert('Ссылка не найдена');
+            } else if(hash.startsWith('file=')) {
+                const params = new URLSearchParams(hash);
+                const dataUrl = decodeURIComponent(params.get('file'));
+                const fileName = params.get('name') || 'download';
+                let container = document.getElementById('download-temp');
+                if(!container) {
+                    container = document.createElement('div');
+                    container.id = 'download-temp';
+                    container.className = 'glass-container';
+                    container.style.position = 'fixed';
+                    container.style.top = '50%';
+                    container.style.left = '50%';
+                    container.style.transform = 'translate(-50%, -50%)';
+                    container.style.zIndex = '1000';
+                    container.style.maxWidth = '90%';
+                    container.style.width = '400px';
+                    document.body.appendChild(container);
+                }
+                container.style.display = 'block';
+                container.innerHTML = `<div class="glass-counter">📥 5.CortexAI</div><div class="container"><h1>Скачивание</h1><div class="file-card"><p>${escapeHtml(fileName)}</p></div><button id="do-dl" class="small-btn">⬇️ Скачать</button><button id="close-dl" class="back-button">Закрыть</button></div>`;
+                document.getElementById('do-dl').onclick = () => { const a = document.createElement('a'); a.href = dataUrl; a.download = fileName; a.click(); };
+                document.getElementById('close-dl').onclick = () => { container.style.display = 'none'; window.location.hash = ''; };
+            }
+        }
+
+        function copyToClipboard(text) { navigator.clipboard.writeText(text).then(()=>alert('Скопировано!')); }
+        function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+
+        // Управление экранами
+        const mainScreen = document.getElementById('main-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        const photoScreen = document.getElementById('photo-screen');
+        const fileLinkScreen = document.getElementById('file-link-screen');
+        const shortenerScreen = document.getElementById('shortener-screen');
+        const statsScreen = document.getElementById('stats-screen');
+        function switchTo(screen) {
+            [mainScreen, chatScreen, photoScreen, fileLinkScreen, shortenerScreen, statsScreen].forEach(s=>s.style.display='none');
+            screen.style.display='block';
+        }
+        document.getElementById('show-chat-btn').onclick = () => switchTo(chatScreen);
+        document.getElementById('show-photo-gen').onclick = () => switchTo(photoScreen);
+        document.getElementById('show-file-link').onclick = () => switchTo(fileLinkScreen);
+        document.getElementById('show-url-shortener').onclick = () => switchTo(shortenerScreen);
+        document.getElementById('show-stats').onclick = () => { switchTo(statsScreen); updateStatsPage(); };
+        document.getElementById('back-to-main').onclick = () => switchTo(mainScreen);
+        document.getElementById('back-from-photo').onclick = () => switchTo(mainScreen);
+        document.getElementById('back-from-file-link').onclick = () => switchTo(mainScreen);
+        document.getElementById('back-from-shortener').onclick = () => switchTo(mainScreen);
+        document.getElementById('back-from-stats').onclick = () => switchTo(mainScreen);
+
+        loadUrlMap();
+        window.addEventListener('hashchange', handleRedirects);
+        handleRedirects();
+        if(messages.length===0) addMessage('assistant', 'Привет! Я 5.CortexAI. Я помню наши разговоры, умею искать в Google и отправлять ссылки на фото. Чем могу помочь? 😊');
+    })();
+</script>
+</body>
+</html>
