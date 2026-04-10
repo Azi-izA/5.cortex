@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>5.CortexShare — быстрый файлообменник</title>
+    <title>5.Cortex — Файлообменник + Сокращатель ссылок</title>
     <style>
         * {
             margin: 0;
@@ -20,11 +20,11 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
-        /* Glassmorphism карточки */
+        /* Glassmorphism */
         .glass-card {
             background: rgba(20, 25, 40, 0.7);
             backdrop-filter: blur(12px);
@@ -33,18 +33,16 @@
             padding: 28px 24px;
             margin-bottom: 24px;
             box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s;
         }
 
         h1 {
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 700;
             background: linear-gradient(135deg, #fff, #7c9eff);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             margin-bottom: 8px;
-            letter-spacing: -0.3px;
         }
 
         .sub {
@@ -54,7 +52,38 @@
             padding-left: 14px;
         }
 
-        /* Зона загрузки */
+        /* Вкладки */
+        .tabs {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: rgba(30, 35, 55, 0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 60px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #b9c3e6;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #4f7aff, #2b4cd4);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(79,122,255,0.3);
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Зона загрузки файлов */
         .dropzone {
             border: 2px dashed rgba(79, 122, 255, 0.5);
             border-radius: 28px;
@@ -64,18 +93,11 @@
             transition: all 0.2s;
             background: rgba(0, 0, 0, 0.2);
         }
-
         .dropzone.drag-over {
             border-color: #4f7aff;
             background: rgba(79, 122, 255, 0.1);
             transform: scale(0.99);
         }
-
-        .dropzone-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-
         .btn {
             background: linear-gradient(135deg, #4f7aff, #2b4cd4);
             border: none;
@@ -90,17 +112,14 @@
             align-items: center;
             gap: 8px;
         }
-
         .btn-outline {
             background: transparent;
             border: 1px solid #4f7aff;
             color: #4f7aff;
         }
-
         .btn-outline:hover {
             background: rgba(79, 122, 255, 0.2);
         }
-
         .progress-bar {
             width: 100%;
             height: 6px;
@@ -109,15 +128,13 @@
             overflow: hidden;
             margin: 16px 0;
         }
-
         .progress-fill {
             width: 0%;
             height: 100%;
             background: linear-gradient(90deg, #4f7aff, #9b4dff);
             transition: width 0.3s;
         }
-
-        .file-item {
+        .file-item, .link-item {
             background: rgba(30, 35, 55, 0.6);
             border-radius: 20px;
             padding: 16px;
@@ -127,37 +144,29 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
         }
-
-        .file-info {
+        .file-info, .link-info {
             flex: 1;
             min-width: 150px;
         }
-
-        .file-name {
+        .file-name, .link-original {
             font-weight: 600;
             word-break: break-all;
         }
-
-        .file-meta {
+        .file-meta, .link-meta {
             font-size: 0.75rem;
             color: #8e9bb5;
             margin-top: 4px;
         }
-
-        .file-link {
+        .link-short {
             font-size: 0.8rem;
             color: #7c9eff;
             word-break: break-all;
         }
-
         .action-buttons {
             display: flex;
             gap: 10px;
         }
-
         .icon-btn {
             background: rgba(255, 255, 255, 0.08);
             border: none;
@@ -168,11 +177,9 @@
             font-size: 0.8rem;
             transition: 0.2s;
         }
-
         .icon-btn:hover {
             background: rgba(79, 122, 255, 0.4);
         }
-
         .toast {
             position: fixed;
             bottom: 30px;
@@ -186,100 +193,139 @@
             font-size: 0.9rem;
             z-index: 1000;
             animation: fadeInUp 0.3s ease;
-            border: 1px solid rgba(79, 122, 255, 0.4);
         }
-
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
-
+        .url-input-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .url-input-group input {
+            flex: 1;
+            background: rgba(30,35,55,0.8);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 60px;
+            padding: 14px 20px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+        .url-input-group input:focus {
+            border-color: #4f7aff;
+        }
+        .custom-code {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 60px;
+            padding: 4px 8px 4px 18px;
+        }
+        .custom-code span {
+            color: #8e9bb5;
+        }
+        .custom-code input {
+            width: 150px;
+            background: transparent;
+            border: none;
+            color: white;
+            outline: none;
+        }
         @media (max-width: 640px) {
-            .glass-card {
-                padding: 20px 16px;
-            }
-            .file-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .action-buttons {
-                align-self: flex-end;
-            }
+            .glass-card { padding: 20px 16px; }
+            .file-item, .link-item { flex-direction: column; align-items: flex-start; }
+            .action-buttons { align-self: flex-end; }
+            .custom-code { width: 100%; justify-content: space-between; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="glass-card">
-        <h1>⚡ 5.CortexShare</h1>
-        <div class="sub">Быстрый файлообменник — загружайте файлы до 500 МБ, ссылка действует 30 дней</div>
+    <div class="glass-card" style="text-align: center; padding-bottom: 20px;">
+        <h1>⚡ 5.Cortex Tools</h1>
+        <div class="sub">Файлообменник + Сокращатель ссылок</div>
+    </div>
 
-        <div id="dropzone" class="dropzone">
-            <div class="dropzone-icon">📂</div>
-            <div>Перетащите файл сюда или нажмите для выбора</div>
-            <input type="file" id="fileInput" style="display: none;">
-            <div style="margin-top: 20px;">
-                <button id="selectFileBtn" class="btn">Выбрать файл</button>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="files">📁 Файлообменник</button>
+        <button class="tab-btn" data-tab="links">🔗 Сокращатель ссылок (5.cortex.clck)</button>
+    </div>
+
+    <!-- Панель файлообменника -->
+    <div id="files-tab" class="tab-pane active">
+        <div class="glass-card">
+            <div id="dropzone" class="dropzone">
+                <div class="dropzone-icon">📂</div>
+                <div>Перетащите файл сюда или нажмите для выбора</div>
+                <input type="file" id="fileInput" style="display: none;">
+                <div style="margin-top: 20px;">
+                    <button id="selectFileBtn" class="btn">Выбрать файл</button>
+                </div>
+            </div>
+            <div id="uploadProgress" style="display: none;">
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                <div id="uploadStatus" style="font-size: 0.85rem; color: #aaa;">Подготовка...</div>
             </div>
         </div>
 
-        <div id="uploadProgress" style="display: none;">
-            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-            <div id="uploadStatus" style="font-size: 0.85rem; color: #aaa;">Подготовка...</div>
+        <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="font-size: 1.4rem;">📁 Последние загрузки</h2>
+                <button id="clearHistoryBtn" class="icon-btn" style="background: rgba(255,60,60,0.2);">Очистить историю</button>
+            </div>
+            <div id="historyList"><div style="text-align: center; padding: 20px;">Нет загруженных файлов</div></div>
         </div>
     </div>
 
-    <div class="glass-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h2 style="font-size: 1.4rem;">📁 Последние загрузки</h2>
-            <button id="clearHistoryBtn" class="icon-btn" style="background: rgba(255,60,60,0.2);">Очистить историю</button>
+    <!-- Панель сокращателя ссылок -->
+    <div id="links-tab" class="tab-pane">
+        <div class="glass-card">
+            <h2 style="font-size: 1.4rem; margin-bottom: 16px;">Создать короткую ссылку</h2>
+            <div class="url-input-group">
+                <input type="text" id="longUrlInput" placeholder="Введите длинную ссылку (https://...)" style="flex: 2;">
+                <div class="custom-code">
+                    <span>5.cortex.clck/</span>
+                    <input type="text" id="customCode" placeholder="код" maxlength="30">
+                </div>
+                <button id="shortenBtn" class="btn">Сократить</button>
+            </div>
         </div>
-        <div id="historyList">
-            <div style="text-align: center; color: #8e9bb5; padding: 20px;">Здесь будут ваши загруженные файлы</div>
+
+        <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="font-size: 1.4rem;">📋 Мои короткие ссылки</h2>
+                <button id="clearLinksBtn" class="icon-btn" style="background: rgba(255,60,60,0.2);">Очистить все</button>
+            </div>
+            <div id="linksList"><div style="text-align: center; padding: 20px;">Нет сокращённых ссылок</div></div>
         </div>
     </div>
 </div>
 
 <script>
-    // Конфигурация
+    // ==================== ФАЙЛООБМЕННИК ====================
     const API_UPLOAD = 'https://tmpfiles.org/api/v1/upload';
-    const STORAGE_KEY = 'cortexshare_history';
+    const STORAGE_KEY = 'cortexshare_files';
 
-    // Элементы
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('fileInput');
-    const selectBtn = document.getElementById('selectFileBtn');
-    const uploadProgressDiv = document.getElementById('uploadProgress');
-    const progressFill = document.getElementById('progressFill');
-    const uploadStatus = document.getElementById('uploadStatus');
-    const historyList = document.getElementById('historyList');
-    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    let fileHistory = [];
 
-    // История загрузок
-    let history = [];
-
-    function loadHistory() {
+    function loadFileHistory() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
-            try {
-                history = JSON.parse(saved);
-            } catch(e) { history = []; }
+            try { fileHistory = JSON.parse(saved); } catch(e) { fileHistory = []; }
         }
-        renderHistory();
+        renderFileHistory();
     }
 
-    function saveHistory() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 50))); // храним последние 50
+    function saveFileHistory() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fileHistory.slice(0, 50)));
     }
 
-    function addToHistory(fileName, fileSize, downloadUrl, deleteUrl = null) {
-        history.unshift({
+    function addToFileHistory(fileName, fileSize, downloadUrl, deleteUrl = null) {
+        fileHistory.unshift({
             id: Date.now(),
             name: fileName,
             size: fileSize,
@@ -287,8 +333,8 @@
             deleteUrl: deleteUrl,
             date: new Date().toISOString()
         });
-        saveHistory();
-        renderHistory();
+        saveFileHistory();
+        renderFileHistory();
     }
 
     function formatBytes(bytes) {
@@ -299,13 +345,14 @@
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 
-    function renderHistory() {
-        if (!historyList) return;
-        if (history.length === 0) {
-            historyList.innerHTML = '<div style="text-align: center; color: #8e9bb5; padding: 20px;">Нет загруженных файлов</div>';
+    function renderFileHistory() {
+        const container = document.getElementById('historyList');
+        if (!container) return;
+        if (fileHistory.length === 0) {
+            container.innerHTML = '<div style="text-align: center; color: #8e9bb5; padding: 20px;">Нет загруженных файлов</div>';
             return;
         }
-        historyList.innerHTML = history.map(item => `
+        container.innerHTML = fileHistory.map(item => `
             <div class="file-item" data-id="${item.id}">
                 <div class="file-info">
                     <div class="file-name">${escapeHtml(item.name)}</div>
@@ -313,45 +360,200 @@
                     <div class="file-link" style="font-size: 0.7rem;">${escapeHtml(item.url)}</div>
                 </div>
                 <div class="action-buttons">
-                    <button class="icon-btn copy-link" data-url="${item.url}">📋 Копировать</button>
+                    <button class="icon-btn copy-file-link" data-url="${item.url}">📋 Копировать</button>
                     <a href="${item.url}" target="_blank" class="icon-btn" style="text-decoration: none;">🔗 Открыть</a>
-                    <button class="icon-btn delete-item" data-id="${item.id}" style="background: rgba(255,60,60,0.2);">🗑</button>
+                    <button class="icon-btn delete-file" data-id="${item.id}" style="background: rgba(255,60,60,0.2);">🗑</button>
                 </div>
             </div>
         `).join('');
 
-        // Обработчики копирования
-        document.querySelectorAll('.copy-link').forEach(btn => {
+        document.querySelectorAll('.copy-file-link').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const url = btn.getAttribute('data-url');
-                copyToClipboard(url);
+                copyToClipboard(btn.getAttribute('data-url'));
                 showToast('Ссылка скопирована!');
             });
         });
-
-        // Удаление отдельных элементов
-        document.querySelectorAll('.delete-item').forEach(btn => {
+        document.querySelectorAll('.delete-file').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const id = parseInt(btn.getAttribute('data-id'));
-                history = history.filter(item => item.id !== id);
-                saveHistory();
-                renderHistory();
+                fileHistory = fileHistory.filter(item => item.id !== id);
+                saveFileHistory();
+                renderFileHistory();
                 showToast('Файл удалён из истории');
             });
         });
     }
 
+    async function uploadFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const uploadDiv = document.getElementById('uploadProgress');
+        const progressFill = document.getElementById('progressFill');
+        const uploadStatus = document.getElementById('uploadStatus');
+        uploadDiv.style.display = 'block';
+        progressFill.style.width = '0%';
+        uploadStatus.innerText = 'Загрузка...';
+
+        let progress = 0;
+        const interval = setInterval(() => {
+            if (progress < 90) {
+                progress += 10;
+                progressFill.style.width = progress + '%';
+            }
+        }, 200);
+
+        try {
+            const response = await fetch(API_UPLOAD, { method: 'POST', body: formData });
+            clearInterval(interval);
+            progressFill.style.width = '100%';
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (data.status !== 'success' || !data.data?.url) throw new Error('Ошибка получения ссылки');
+            let downloadUrl = data.data.url;
+            if (!downloadUrl.includes('?download')) downloadUrl += '?download=1';
+            addToFileHistory(file.name, file.size, downloadUrl, data.data.delete_url || null);
+            uploadStatus.innerText = 'Готово!';
+            showToast('Файл загружен! Ссылка скопирована');
+            copyToClipboard(downloadUrl);
+            setTimeout(() => { uploadDiv.style.display = 'none'; progressFill.style.width = '0%'; }, 1500);
+        } catch (err) {
+            clearInterval(interval);
+            uploadStatus.innerText = `Ошибка: ${err.message}`;
+            setTimeout(() => { uploadDiv.style.display = 'none'; }, 3000);
+        }
+    }
+
+    // ==================== СОКРАЩАТЕЛЬ ССЫЛОК ====================
+    const LINKS_STORAGE = 'cortexshare_links';
+    let shortLinks = [];
+
+    function loadLinks() {
+        const saved = localStorage.getItem(LINKS_STORAGE);
+        if (saved) {
+            try { shortLinks = JSON.parse(saved); } catch(e) { shortLinks = []; }
+        }
+        renderLinks();
+    }
+
+    function saveLinks() {
+        localStorage.setItem(LINKS_STORAGE, JSON.stringify(shortLinks.slice(0, 100)));
+    }
+
+    function generateShortCode(length = 6) {
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for (let i = 0; i < length; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
+    }
+
+    function isCodeAvailable(code) {
+        return !shortLinks.some(link => link.code === code);
+    }
+
+    function addShortLink(originalUrl, customCode = null) {
+        let code = customCode ? customCode.trim() : '';
+        if (code) {
+            if (!isCodeAvailable(code)) {
+                showToast('Этот код уже занят, используйте другой');
+                return null;
+            }
+            if (!/^[a-zA-Z0-9\-_]+$/.test(code)) {
+                showToast('Код может содержать только буквы, цифры, - и _');
+                return null;
+            }
+        } else {
+            do { code = generateShortCode(); } while (!isCodeAvailable(code));
+        }
+        const shortUrl = `https://5.cortex.clck/${code}`;
+        shortLinks.unshift({
+            id: Date.now(),
+            original: originalUrl,
+            code: code,
+            short: shortUrl,
+            clicks: 0,
+            date: new Date().toISOString()
+        });
+        saveLinks();
+        renderLinks();
+        return shortUrl;
+    }
+
+    function renderLinks() {
+        const container = document.getElementById('linksList');
+        if (!container) return;
+        if (shortLinks.length === 0) {
+            container.innerHTML = '<div style="text-align: center; color: #8e9bb5; padding: 20px;">Нет сокращённых ссылок</div>';
+            return;
+        }
+        container.innerHTML = shortLinks.map(item => `
+            <div class="link-item" data-id="${item.id}">
+                <div class="link-info">
+                    <div class="link-original">${escapeHtml(truncate(item.original, 60))}</div>
+                    <div class="link-short">${escapeHtml(item.short)}</div>
+                    <div class="link-meta">Кликов: ${item.clicks || 0} • ${new Date(item.date).toLocaleString()}</div>
+                </div>
+                <div class="action-buttons">
+                    <button class="icon-btn copy-link-short" data-url="${item.short}">📋 Копировать</button>
+                    <button class="icon-btn open-link-short" data-url="${item.short}">🔗 Открыть</button>
+                    <button class="icon-btn delete-link" data-id="${item.id}" style="background: rgba(255,60,60,0.2);">🗑</button>
+                </div>
+            </div>
+        `).join('');
+
+        document.querySelectorAll('.copy-link-short').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                copyToClipboard(btn.getAttribute('data-url'));
+                showToast('Ссылка скопирована!');
+            });
+        });
+        document.querySelectorAll('.open-link-short').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const url = btn.getAttribute('data-url');
+                // симуляция перехода — открываем оригинальный URL
+                const linkItem = shortLinks.find(l => l.short === url);
+                if (linkItem) {
+                    linkItem.clicks = (linkItem.clicks || 0) + 1;
+                    saveLinks();
+                    renderLinks();
+                    window.open(linkItem.original, '_blank');
+                } else {
+                    window.open(url, '_blank');
+                }
+            });
+        });
+        document.querySelectorAll('.delete-link').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = parseInt(btn.getAttribute('data-id'));
+                shortLinks = shortLinks.filter(l => l.id !== id);
+                saveLinks();
+                renderLinks();
+                showToast('Ссылка удалена');
+            });
+        });
+    }
+
+    function truncate(str, len) {
+        if (str.length <= len) return str;
+        return str.substring(0, len) + '...';
+    }
+
+    // Общие утилиты
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text).catch(() => {
-            // fallback
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
             document.execCommand('copy');
-            document.body.removeChild(textarea);
+            document.body.removeChild(ta);
         });
     }
 
@@ -365,116 +567,92 @@
         setTimeout(() => toast.remove(), 2500);
     }
 
-    // Загрузка файла на tmpfiles.org
-    async function uploadFile(file) {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        uploadProgressDiv.style.display = 'block';
-        progressFill.style.width = '0%';
-        uploadStatus.innerText = 'Загрузка...';
-
-        // Симуляция прогресса (реальный прогресс fetch не поддерживает без XHR, но сделаем видимость)
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-            if (progress < 90) {
-                progress += 10;
-                progressFill.style.width = progress + '%';
-            }
-        }, 200);
-
-        try {
-            const response = await fetch(API_UPLOAD, {
-                method: 'POST',
-                body: formData
-            });
-
-            clearInterval(progressInterval);
-            progressFill.style.width = '100%';
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            // tmpfiles.org возвращает { status: "success", data: { url: "https://tmpfiles.org/dl/...", deleteUrl: "..." } }
-            if (data.status !== 'success' || !data.data?.url) {
-                throw new Error('Не удалось получить ссылку');
-            }
-
-            // Ссылка для скачивания (оригинальная) — она ведёт на страницу с кнопкой.
-            // Прямая ссылка на файл: data.data.url.replace('/dl/', '/download/') или добавим /raw? Я проверю.
-            let downloadUrl = data.data.url;
-            // Конвертируем в прямую ссылку для скачивания (tmpfiles.org позволяет добавить ?download=1)
-            if (!downloadUrl.includes('?download')) {
-                downloadUrl = downloadUrl + '?download=1';
-            }
-            const deleteUrl = data.data.delete_url || null;
-
-            addToHistory(file.name, file.size, downloadUrl, deleteUrl);
-            uploadStatus.innerText = 'Готово!';
-            showToast('Файл загружен! Ссылка скопирована');
-            copyToClipboard(downloadUrl);
-
-            setTimeout(() => {
-                uploadProgressDiv.style.display = 'none';
-                progressFill.style.width = '0%';
-            }, 1500);
-        } catch (err) {
-            clearInterval(progressInterval);
-            uploadStatus.innerText = `Ошибка: ${err.message}`;
-            console.error(err);
-            setTimeout(() => {
-                uploadProgressDiv.style.display = 'none';
-            }, 3000);
-        }
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
     }
 
-    // Обработчики перетаскивания
-    dropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.classList.add('drag-over');
-    });
-    dropzone.addEventListener('dragleave', () => {
-        dropzone.classList.remove('drag-over');
-    });
-    dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.classList.remove('drag-over');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            uploadFile(files[0]);
-        }
-    });
-    selectBtn.addEventListener('click', () => {
-        fileInput.click();
-    });
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files.length > 0) {
-            uploadFile(fileInput.files[0]);
-            fileInput.value = '';
-        }
+    // Переключение вкладок
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const panes = {
+        files: document.getElementById('files-tab'),
+        links: document.getElementById('links-tab')
+    };
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.getAttribute('data-tab');
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            Object.values(panes).forEach(p => p.classList.remove('active'));
+            if (tab === 'files') panes.files.classList.add('active');
+            else if (tab === 'links') panes.links.classList.add('active');
+        });
     });
 
-    clearHistoryBtn.addEventListener('click', () => {
+    // Инициализация файлообменника
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const selectBtn = document.getElementById('selectFileBtn');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+    if (dropzone) {
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+        dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('drag-over'); });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) uploadFile(e.dataTransfer.files[0]);
+        });
+        dropzone.addEventListener('click', () => fileInput.click());
+    }
+    if (selectBtn) selectBtn.addEventListener('click', () => fileInput.click());
+    if (fileInput) fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) uploadFile(fileInput.files[0]);
+        fileInput.value = '';
+    });
+    if (clearHistoryBtn) clearHistoryBtn.addEventListener('click', () => {
         if (confirm('Очистить всю историю загрузок?')) {
-            history = [];
-            saveHistory();
-            renderHistory();
+            fileHistory = [];
+            saveFileHistory();
+            renderFileHistory();
             showToast('История очищена');
         }
     });
 
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
+    // Инициализация сокращателя ссылок
+    const longUrlInput = document.getElementById('longUrlInput');
+    const customCodeInput = document.getElementById('customCode');
+    const shortenBtn = document.getElementById('shortenBtn');
+    const clearLinksBtn = document.getElementById('clearLinksBtn');
+
+    if (shortenBtn) {
+        shortenBtn.addEventListener('click', () => {
+            let longUrl = longUrlInput.value.trim();
+            if (!longUrl) { showToast('Введите ссылку'); return; }
+            if (!longUrl.match(/^https?:\/\//i)) longUrl = 'https://' + longUrl;
+            try { new URL(longUrl); } catch(e) { showToast('Некорректный URL'); return; }
+            let customCode = customCodeInput.value.trim();
+            const shortUrl = addShortLink(longUrl, customCode || null);
+            if (shortUrl) {
+                longUrlInput.value = '';
+                customCodeInput.value = '';
+                copyToClipboard(shortUrl);
+                showToast('Короткая ссылка создана и скопирована!');
+            }
+        });
+    }
+    if (clearLinksBtn) {
+        clearLinksBtn.addEventListener('click', () => {
+            if (confirm('Очистить все сокращённые ссылки?')) {
+                shortLinks = [];
+                saveLinks();
+                renderLinks();
+                showToast('Все ссылки удалены');
+            }
         });
     }
 
-    loadHistory();
+    loadFileHistory();
+    loadLinks();
 </script>
 </body>
 </html>
