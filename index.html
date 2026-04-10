@@ -239,6 +239,9 @@
 
 <script>
     (function(){
+        // ========== НОВЫЙ API-КЛЮЧ ==========
+        const FIXED_API_KEY = "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";
+
         // ========== СТАТИСТИКА ==========
         let visits = localStorage.getItem('visitCount');
         if(visits === null) visits = 1; else visits = parseInt(visits)+1;
@@ -310,7 +313,6 @@
         }
 
         // ========== ОСНОВНОЙ ИИ ==========
-        const FIXED_API_KEY = "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";
         let messages = [];
         const responseArea = document.getElementById('response-area');
         const messageInput = document.getElementById('message-input');
