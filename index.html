@@ -2,42 +2,82 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>5.Cortex — Файлообменник + Сокращатель ссылок</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #0a0f1e 0%, #0a0a14 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at 10% 20%, #0a0f1e 0%, #03050a 100%);
             min-height: 100vh;
             color: #eef2ff;
             padding: 20px;
+            position: relative;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* Анимированный фон */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 40%, rgba(79, 122, 255, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Стеклянные карточки с улучшенным эффектом */
         .glass-card {
-            background: rgba(20, 25, 40, 0.7);
-            backdrop-filter: blur(12px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 20, 35, 0.65);
+            backdrop-filter: blur(20px);
+            border-radius: 48px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
             padding: 28px 24px;
             margin-bottom: 24px;
-            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
         }
+
+        .glass-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.5);
+            border-color: rgba(79, 122, 255, 0.3);
+        }
+
         h1 {
-            font-size: 2rem;
+            font-size: 2.4rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #fff, #7c9eff);
+            background: linear-gradient(135deg, #FFFFFF 0%, #7c9eff 100%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
             margin-bottom: 8px;
+            letter-spacing: -0.3px;
         }
+
         .sub {
-            color: #8e9bb5;
+            color: #9aa9c1;
             margin-bottom: 28px;
             border-left: 3px solid #4f7aff;
             padding-left: 14px;
+            font-weight: 400;
         }
+
+        /* Вкладки */
         .tabs {
             display: flex;
             gap: 16px;
@@ -46,27 +86,35 @@
         }
         .tab-btn {
             background: rgba(30, 35, 55, 0.6);
-            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 60px;
             padding: 12px 28px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 590;
             color: #b9c3e6;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
         .tab-btn.active {
             background: linear-gradient(135deg, #4f7aff, #2b4cd4);
             color: white;
             border-color: transparent;
-            box-shadow: 0 4px 15px rgba(79,122,255,0.3);
+            box-shadow: 0 6px 16px rgba(79,122,255,0.3);
+            transform: scale(0.98);
         }
-        .tab-pane { display: none; }
+        .tab-btn:hover:not(.active) {
+            background: rgba(79, 122, 255, 0.2);
+            border-color: rgba(79, 122, 255, 0.5);
+        }
+        .tab-pane { display: none; animation: fadeInUp 0.4s ease; }
         .tab-pane.active { display: block; }
+
+        /* Зона загрузки файлов */
         .dropzone {
             border: 2px dashed rgba(79, 122, 255, 0.5);
-            border-radius: 28px;
-            padding: 40px 20px;
+            border-radius: 40px;
+            padding: 48px 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
@@ -74,23 +122,38 @@
         }
         .dropzone.drag-over {
             border-color: #4f7aff;
-            background: rgba(79, 122, 255, 0.1);
+            background: rgba(79, 122, 255, 0.08);
             transform: scale(0.99);
         }
+        .dropzone-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
         .btn {
             background: linear-gradient(135deg, #4f7aff, #2b4cd4);
             border: none;
-            border-radius: 44px;
-            padding: 12px 28px;
+            border-radius: 60px;
+            padding: 12px 32px;
             font-weight: 600;
             font-size: 1rem;
             color: white;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 4px 12px rgba(79,122,255,0.3);
         }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79,122,255,0.4);
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+
         .progress-bar {
             width: 100%;
             height: 6px;
@@ -103,18 +166,27 @@
             width: 0%;
             height: 100%;
             background: linear-gradient(90deg, #4f7aff, #9b4dff);
-            transition: width 0.3s;
+            transition: width 0.3s ease;
         }
+
+        /* Элементы списка */
         .file-item, .link-item {
-            background: rgba(30, 35, 55, 0.6);
-            border-radius: 20px;
-            padding: 16px;
+            background: rgba(25, 30, 45, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            padding: 16px 20px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .file-item:hover, .link-item:hover {
+            background: rgba(35, 40, 60, 0.8);
+            border-color: rgba(79,122,255,0.3);
         }
         .file-info, .link-info { flex: 1; min-width: 150px; }
         .file-name, .link-original { font-weight: 600; word-break: break-all; }
@@ -125,31 +197,36 @@
             background: rgba(255, 255, 255, 0.08);
             border: none;
             border-radius: 40px;
-            padding: 8px 14px;
+            padding: 8px 16px;
             color: white;
             cursor: pointer;
             font-size: 0.8rem;
             transition: 0.2s;
         }
-        .icon-btn:hover { background: rgba(79, 122, 255, 0.4); }
+        .icon-btn:hover {
+            background: rgba(79, 122, 255, 0.5);
+            transform: scale(0.96);
+        }
+
+        /* Уведомления */
         .toast {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             background: #1e293b;
-            backdrop-filter: blur(16px);
-            padding: 12px 24px;
+            backdrop-filter: blur(20px);
+            padding: 12px 28px;
             border-radius: 60px;
             color: white;
             font-size: 0.9rem;
             z-index: 1000;
-            animation: fadeInUp 0.3s ease;
+            animation: slideUp 0.3s ease;
+            border: 1px solid rgba(79,122,255,0.4);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
+
+        /* Форма сокращения */
         .url-input-group {
             display: flex;
             gap: 12px;
@@ -159,29 +236,47 @@
         .url-input-group input {
             flex: 1;
             background: rgba(30,35,55,0.8);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 60px;
-            padding: 14px 20px;
+            padding: 14px 24px;
             color: white;
             font-size: 1rem;
             outline: none;
+            transition: all 0.2s;
         }
-        .url-input-group input:focus { border-color: #4f7aff; }
+        .url-input-group input:focus {
+            border-color: #4f7aff;
+            box-shadow: 0 0 0 3px rgba(79,122,255,0.2);
+        }
         .custom-code {
             display: flex;
             align-items: center;
             gap: 8px;
             background: rgba(0,0,0,0.3);
             border-radius: 60px;
-            padding: 4px 8px 4px 18px;
+            padding: 4px 8px 4px 20px;
         }
         .custom-code span { color: #8e9bb5; }
-        .custom-code input { width: 150px; background: transparent; border: none; color: white; outline: none; }
+        .custom-code input { width: 140px; background: transparent; border: none; color: white; outline: none; padding: 10px 0; }
+
+        /* Анимации */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
         @media (max-width: 640px) {
-            .glass-card { padding: 20px 16px; }
+            body { padding: 12px; }
+            .glass-card { padding: 20px 16px; border-radius: 32px; }
+            h1 { font-size: 1.8rem; }
             .file-item, .link-item { flex-direction: column; align-items: flex-start; }
             .action-buttons { align-self: flex-end; }
             .custom-code { width: 100%; justify-content: space-between; }
+            .custom-code input { width: auto; flex: 1; }
         }
     </style>
 </head>
@@ -189,7 +284,7 @@
 <div class="container">
     <div class="glass-card" style="text-align: center; padding-bottom: 20px;">
         <h1>⚡ 5.Cortex Tools</h1>
-        <div class="sub">Файлообменник + Сокращатель ссылок (работает при копировании)</div>
+        <div class="sub">Файлообменник + Сокращатель ссылок — быстро, красиво, надёжно</div>
     </div>
 
     <div class="tabs">
@@ -197,31 +292,36 @@
         <button class="tab-btn" data-tab="links">🔗 Сокращатель ссылок</button>
     </div>
 
+    <!-- Панель файлообменника -->
     <div id="files-tab" class="tab-pane active">
         <div class="glass-card">
             <div id="dropzone" class="dropzone">
                 <div class="dropzone-icon">📂</div>
                 <div>Перетащите файл сюда или нажмите для выбора</div>
                 <input type="file" id="fileInput" style="display: none;">
-                <div style="margin-top: 20px;"><button id="selectFileBtn" class="btn">Выбрать файл</button></div>
+                <div style="margin-top: 24px;">
+                    <button id="selectFileBtn" class="btn">Выбрать файл</button>
+                </div>
             </div>
             <div id="uploadProgress" style="display: none;">
                 <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
                 <div id="uploadStatus" style="font-size: 0.85rem; color: #aaa;">Подготовка...</div>
             </div>
         </div>
+
         <div class="glass-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 style="font-size: 1.4rem;">📁 Последние загрузки</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 1.5rem; font-weight: 600;">📁 Последние загрузки</h2>
                 <button id="clearHistoryBtn" class="icon-btn" style="background: rgba(255,60,60,0.2);">Очистить историю</button>
             </div>
-            <div id="historyList"><div style="text-align: center; padding: 20px;">Нет загруженных файлов</div></div>
+            <div id="historyList"><div style="text-align: center; padding: 30px; color: #8e9bb5;">Нет загруженных файлов</div></div>
         </div>
     </div>
 
+    <!-- Панель сокращателя ссылок -->
     <div id="links-tab" class="tab-pane">
         <div class="glass-card">
-            <h2 style="font-size: 1.4rem; margin-bottom: 16px;">Создать короткую ссылку</h2>
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 16px;">Создать короткую ссылку</h2>
             <div class="url-input-group">
                 <input type="text" id="longUrlInput" placeholder="Введите длинную ссылку (https://...)" style="flex: 2;">
                 <div class="custom-code">
@@ -231,16 +331,17 @@
                 <button id="shortenBtn" class="btn">Сократить</button>
             </div>
             <p style="font-size: 0.75rem; color: #8e9bb5; margin-top: 8px;">
-                Короткая ссылка будет вида: <span id="exampleShortUrl">https://azi-iza.github.io/5.cortex/?go=код</span><br>
-                <span style="color: #7c9eff;">✅ Теперь ссылку можно копировать и вставлять куда угодно — она будет работать!</span>
+                🔗 Короткая ссылка: <span id="exampleShortUrl" style="color: #7c9eff;"></span><br>
+                ✅ Копируйте и делитесь — работает везде!
             </p>
         </div>
+
         <div class="glass-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 style="font-size: 1.4rem;">📋 Мои короткие ссылки</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 1.5rem; font-weight: 600;">📋 Мои короткие ссылки</h2>
                 <button id="clearLinksBtn" class="icon-btn" style="background: rgba(255,60,60,0.2);">Очистить все</button>
             </div>
-            <div id="linksList"><div style="text-align: center; padding: 20px;">Нет сокращённых ссылок</div></div>
+            <div id="linksList"><div style="text-align: center; padding: 30px; color: #8e9bb5;">Нет сокращённых ссылок</div></div>
         </div>
     </div>
 </div>
@@ -271,7 +372,7 @@
     function renderFileHistory() {
         const container = document.getElementById('historyList');
         if (!container) return;
-        if (fileHistory.length === 0) { container.innerHTML = '<div style="text-align: center; color: #8e9bb5; padding: 20px;">Нет загруженных файлов</div>'; return; }
+        if (fileHistory.length === 0) { container.innerHTML = '<div style="text-align: center; padding: 30px; color: #8e9bb5;">Нет загруженных файлов</div>'; return; }
         container.innerHTML = fileHistory.map(item => `
             <div class="file-item" data-id="${item.id}">
                 <div class="file-info">
@@ -282,7 +383,7 @@
                 <div class="action-buttons">
                     <button class="icon-btn copy-file-link" data-url="${item.url}">📋 Копировать</button>
                     <a href="${item.url}" target="_blank" class="icon-btn" style="text-decoration: none;">🔗 Открыть</a>
-                    <button class="icon-btn delete-file" data-id="${item.id}" style="background: rgba(255,60,60,0.2);">🗑</button>
+                    <button class="icon-btn delete-file" data-id="${item.id}" style="background: rgba(255,60,60,0.2);">🗑 Удалить</button>
                 </div>
             </div>
         `).join('');
@@ -316,11 +417,15 @@
         }
     }
 
-    // ========== СОКРАЩАТЕЛЬ ССЫЛОК (через GET-параметр) ==========
+    // ========== СОКРАЩАТЕЛЬ ССЫЛОК ==========
     const LINKS_STORAGE = 'cortexshare_links';
     let shortLinks = [];
 
-    function getBaseUrl() { return window.location.href.split('?')[0].split('#')[0]; }
+    function getBaseUrl() { 
+        let url = window.location.href.split('?')[0].split('#')[0];
+        if (url.endsWith('index.html')) url = url.slice(0, -10);
+        return url;
+    }
     function loadLinks() {
         const saved = localStorage.getItem(LINKS_STORAGE);
         if (saved) { try { shortLinks = JSON.parse(saved); } catch(e) { shortLinks = []; } }
@@ -350,18 +455,18 @@
     function renderLinks() {
         const container = document.getElementById('linksList');
         if (!container) return;
-        if (shortLinks.length === 0) { container.innerHTML = '<div style="text-align: center; color: #8e9bb5; padding: 20px;">Нет сокращённых ссылок</div>'; return; }
+        if (shortLinks.length === 0) { container.innerHTML = '<div style="text-align: center; padding: 30px; color: #8e9bb5;">Нет сокращённых ссылок</div>'; return; }
         container.innerHTML = shortLinks.map(item => `
             <div class="link-item" data-id="${item.id}">
                 <div class="link-info">
                     <div class="link-original">${escapeHtml(truncate(item.original, 60))}</div>
                     <div class="link-short">${escapeHtml(item.short)}</div>
-                    <div class="link-meta">Кликов: ${item.clicks || 0} • ${new Date(item.date).toLocaleString()}</div>
+                    <div class="link-meta">👆 Кликов: ${item.clicks || 0} • ${new Date(item.date).toLocaleString()}</div>
                 </div>
                 <div class="action-buttons">
                     <button class="icon-btn copy-link-short" data-url="${item.short}">📋 Копировать</button>
                     <button class="icon-btn open-link-short" data-url="${item.short}">🔗 Открыть</button>
-                    <button class="icon-btn delete-link" data-id="${item.id}" style="background: rgba(255,60,60,0.2);">🗑</button>
+                    <button class="icon-btn delete-link" data-id="${item.id}" style="background: rgba(255,60,60,0.2);">🗑 Удалить</button>
                 </div>
             </div>
         `).join('');
@@ -389,11 +494,10 @@
                     }
                 } catch(e) {}
             }
-            // Если ссылка не найдена — показываем сообщение
-            document.body.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #0a0f1e; color: white; flex-direction: column; gap: 20px;">
+            document.body.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #0a0f1e; color: white; flex-direction: column; gap: 20px; text-align: center;">
                 <h1>🔗 5.Cortex</h1>
                 <p>Ссылка с кодом <strong>${escapeHtml(code)}</strong> не найдена или устарела.</p>
-                <a href="${getBaseUrl()}" style="color: #4f7aff;">Перейти на главную</a>
+                <a href="${getBaseUrl()}" style="color: #4f7aff; text-decoration: none; border: 1px solid #4f7aff; padding: 10px 24px; border-radius: 40px;">Перейти на главную</a>
             </div>`;
         }
     }
@@ -414,12 +518,14 @@
     }
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
 
-    // Переключение вкладок
+    // Переключение вкладок с анимацией
     const tabBtns = document.querySelectorAll('.tab-btn');
     const panes = { files: document.getElementById('files-tab'), links: document.getElementById('links-tab') };
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.getAttribute('data-tab');
+            if (tab === 'files' && panes.files.classList.contains('active')) return;
+            if (tab === 'links' && panes.links.classList.contains('active')) return;
             tabBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             Object.values(panes).forEach(p => p.classList.remove('active'));
@@ -473,7 +579,7 @@
     // Запуск
     loadFileHistory();
     loadLinks();
-    handleRedirectFromParam(); // обрабатываем переход по короткой ссылке (с параметром go)
+    handleRedirectFromParam();
 </script>
 </body>
 </html>
